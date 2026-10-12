@@ -4,14 +4,19 @@ const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ||
   import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
   import.meta.env.SUPABASE_URL ||
-  '';
+  'https://wqsaewmgjhlikynheqmo.supabase.co';
 
 const supabaseKey =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   import.meta.env.SUPABASE_ANON_KEY ||
-  '';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indxc2Fld21namhsaWt5bmhlcW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcxNjYwMDAsImV4cCI6MjAyMjc0MjAwMH0.placeholder_key';
+
+export const isSupabaseConfigured = Boolean(
+  (import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env.SUPABASE_URL) &&
+  (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)
+);
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {

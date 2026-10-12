@@ -48,6 +48,7 @@ interface AppContextType extends AppState, ViewState {
   isPropertyOwnerUser: boolean;
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  loginDemoUser: (role?: 'student' | 'manager', name?: string, email?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -268,6 +269,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             } catch (ignore) {}
           }
         }
+      }
+
+      // Check for local demo user session
+      const storedDemo = localStorage.getItem('skycobe_demo_user');
+      if (storedDemo) {
+        try {
+          const parsed = JSON.parse(storedDemo);
+          if (parsed?.id) {
+            await handleUserSession(parsed);
+            return;
+          }
+        } catch (e) {}
       }
 
       if (!isAuthRedirect && isMounted) {
@@ -492,6 +505,41 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const clearToast = () => setToastMessage(null);
   const showToast = (msg: string) => setToastMessage(msg);
 
+  const loginDemoUser = (role: 'student' | 'manager' = 'student', name?: string, email?: string) => {
+    const isHost = role === 'manager';
+    const demoUser = {
+      id: isHost ? 'demo-manager-id-01' : 'demo-student-id-01',
+      email: email || (isHost ? 'manager@skycobe.com' : 'student@skycobe.com'),
+      user_metadata: {
+        first_name: name ? name.split(' ')[0] : isHost ? 'Kofi' : 'Alex',
+        last_name: name ? name.split(' ').slice(1).join(' ') || 'User' : isHost ? 'Mensah' : 'Owusu',
+        full_name: name || (isHost ? 'Kofi Mensah' : 'Alex Owusu'),
+        account_type: role,
+        role: role,
+        university: 'University of Ghana, Legon',
+        level: '300',
+      }
+    };
+    localStorage.setItem('skycobe_demo_user', JSON.stringify(demoUser));
+    localStorage.setItem(`skycobe_role_${demoUser.id}`, role);
+    localStorage.setItem(`skycobe_onboarding_${demoUser.id}`, 'done');
+    setUser(demoUser);
+    setProfile({
+      id: demoUser.id,
+      role: role,
+      account_type: role,
+      first_name: demoUser.user_metadata.first_name,
+      last_name: demoUser.user_metadata.last_name,
+      full_name: demoUser.user_metadata.full_name,
+      avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      cover_url: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as UserProfile);
+    syncUserData(demoUser);
+    setProfileLoading(false);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -537,6 +585,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setEarnedCash,
         referralCode,
         referees,
+        loginDemoUser,
       }}
     >
       {children}

@@ -63,8 +63,9 @@ export const Profile: React.FC = () => {
     } else if (action === 'Edit Profile Photo') {
       setPhotoModalState({ isOpen: true, type: 'avatar' });
     } else if (action === 'Log Out') {
+      localStorage.removeItem('skycobe_demo_user');
       import('../lib/supabase').then(({ supabase }) => {
-        supabase.auth.signOut().then(() => {
+        supabase.auth.signOut().catch(() => {}).then(() => {
           navigate("/login");
           showToast('Logged out successfully');
         });

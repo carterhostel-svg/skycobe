@@ -2,5 +2,7 @@
   "name": "SKYCOBE",
   "description": "Find your perfect student property with SKYCOBE",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
