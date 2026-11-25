@@ -21,7 +21,7 @@ export const Toast: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-[100px] left-1/2 -translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:translate-x-0 z-[1000] bg-gray-900 text-white py-2.5 px-5 rounded-full shadow-lg font-medium text-[0.85rem] whitespace-nowrap pointer-events-none"
+          className="fixed bottom-[100px] left-1/2 -translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:translate-x-0 z-[1000] bg-[#1a1d27] text-white py-2.5 px-5 rounded-xl shadow-2xl font-medium text-[0.85rem] whitespace-nowrap pointer-events-none"
         >
           {toastMessage}
         </motion.div>

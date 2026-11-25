@@ -1,372 +1,447 @@
-import { useNavigate } from "react-router-dom";
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  CalendarCheck, 
+  ShieldCheck, 
+  MapPin, 
+  Moon, 
+  Sun, 
+  Monitor, 
+  QrCode, 
+  Copy, 
+  Trash2, 
+  Heart, 
+  Compass, 
+  Phone, 
+  X,
+  Sliders,
+  CheckCircle2
+} from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useTheme, type ThemeMode } from '../context/ThemeContext';
-import { PageHeader } from '../components/layout/PageHeader';
-import { OpportunitiesSection } from '../components/opportunities/OpportunitiesSection';
-import { User, CreditCard, Bell, Shield, HelpCircle, FileText, PenLine, LogOut, ChevronRight, Moon, Sun, Monitor, Maximize, Minimize, ScanLine, Settings, Camera, Image, Building, Hotel } from 'lucide-react';
-import { PhotoModal } from '../components/profile/PhotoModal';
-
-function ThemeRow() {
-  const { mode, resolved, setMode } = useTheme();
-
-  const next: Record<ThemeMode, ThemeMode> = {
-    light: 'dark', dark: 'system', system: 'light',
-  };
-
-  const icons: Record<ThemeMode, React.ReactNode> = { light: <Sun size={16} />, dark: <Moon size={16} />, system: <Monitor size={16} /> };
-  const labels: Record<ThemeMode, string> = { light: 'Light', dark: 'Dark', system: 'System' };
-
-  return (
-    <button
-      type="button"
-      onClick={() => setMode(next[mode])}
-      className="flex items-center justify-between w-full p-4 border-b border-transparent text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group"
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[var(--color-accent-muted)]/20 text-text-muted flex items-center justify-center shrink-0">
-          <span style={{ color: 'var(--color-accent)' }}>{icons[mode]}</span>
-        </div>
-        <span className="text-[0.9rem] font-semibold text-[var(--color-text-primary)]">
-          Appearance
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
-          {labels[mode]}
-        </span>
-        <ChevronRight size={16} className="text-[var(--color-text-disabled)]" />
-      </div>
-    </button>
-  );
-}
+import { formatPrice } from '../lib/formatPrice';
+import { HostelBooking } from '../types';
 
 export const Profile: React.FC = () => {
-  const { showToast, setCurrentView, isFullscreen, toggleFullscreen, user, profile, refreshProfile, openRoleModal } = useAppContext();
+  const { bookings, cancelBooking, savedProperties, showToast } = useAppContext();
+  const { resolved, setMode } = useTheme();
   const navigate = useNavigate();
 
-  const [photoModalState, setPhotoModalState] = useState<{
-    isOpen: boolean;
-    type: 'avatar' | 'cover';
-  }>({
-    isOpen: false,
-    type: 'avatar',
-  });
+  const [activeVoucher, setActiveVoucher] = useState<HostelBooking | null>(null);
 
-  const isManager = profile?.role === 'manager' || profile?.role === 'accommodation_owner' || profile?.role === 'property_owner' || user?.user_metadata?.account_type === 'manager';
+  // Student Profile Info
+  const student = {
+    name: 'Alex Owusu',
+    id: '10984721',
+    email: 'alex.owusu@ug.edu.gh',
+    phone: '+233 55 123 4567',
+    university: 'University of Ghana, Legon',
+    department: 'Department of Computer Science',
+    level: 'Level 300',
+    avatar: '/src/assets/images/student_alex_avatar_1793064702975.jpg',
+    cover: '/src/assets/images/campus_quad_cover_1793064715898.jpg',
+  };
 
-  const handleAction = (action: string) => {
-    if (action === 'Personal Information' || action === 'Edit Profile') {
-      navigate('/edit-profile');
-    } else if (action === 'Edit Cover Photo') {
-      setPhotoModalState({ isOpen: true, type: 'cover' });
-    } else if (action === 'Edit Profile Photo') {
-      setPhotoModalState({ isOpen: true, type: 'avatar' });
-    } else if (action === 'Log Out') {
-      localStorage.removeItem('skycobe_demo_user');
-      import('../lib/supabase').then(({ supabase }) => {
-        supabase.auth.signOut().catch(() => {}).then(() => {
-          navigate("/login");
-          showToast('Logged out successfully');
-        });
-      });
-    } else {
-      showToast(`${action} action triggered`);
+  const handleCopy = (text: string, label: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      showToast(`${label} copied to clipboard!`);
     }
   };
 
-  const fullName = user?.user_metadata?.full_name || 
-                   `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`.trim() || 
-                   'User';
-  const role = user?.user_metadata?.account_type === 'manager' ? 'Property Manager' : 'Student';
-  const levelText = user?.user_metadata?.level ? `Level ${user?.user_metadata?.level} ` : '';
-  const university = user?.user_metadata?.university || 'University of Ghana, Legon';
-  const email = user?.email || '';
-
-  const coverUrl = profile?.cover_url || user?.user_metadata?.cover_url || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80";
-  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
+  const handleCancelReservation = (bookingId: string, propertyName: string) => {
+    if (window.confirm(`Are you sure you want to cancel your reservation at ${propertyName}?`)) {
+      cancelBooking(bookingId);
+      showToast(`Reservation at ${propertyName} cancelled.`);
+      if (activeVoucher?.id === bookingId) setActiveVoucher(null);
+    }
+  };
 
   return (
-    <div className="w-full flex-1 flex flex-col bg-app-bg font-sans relative">
-      <PageHeader 
-        showBackButton={true}
-        onBack={() => navigate(-1)}
-        actions={[
-          {
-            icon: <ScanLine size={22} strokeWidth={1.8} />,
-            label: "Scan",
-            onClick: () => showToast('Scan action triggered'),
-          },
-          {
-            icon: <Settings size={22} strokeWidth={1.8} />,
-            label: "Settings",
-            onClick: () => showToast('Settings action triggered'),
-          },
-        ]}
-      />
+    <div className="w-full min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] font-sans pb-32">
+      
+      <div className="relative w-full h-48 sm:h-60 bg-[var(--color-surface-2)] overflow-hidden">
+        <img
+          src={student.cover}
+          alt="Campus Quad"
+          className="w-full h-full object-cover brightness-[0.82]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-bg)] via-[var(--color-bg)]/55 to-transparent pointer-events-none" />
+      </div>
 
-      <div className="flex-1 w-full px-4 sm:px-6 lg:px-8 pb-[100px] md:pb-12 flex flex-col md:flex-row gap-8 mt-4 max-w-screen-xl mx-auto relative pt-0 items-start">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-20 relative z-10 w-full flex flex-col gap-8">
         
-        {/* Left Column: User Identity Card */}
-        <div className="w-full md:w-[340px] shrink-0 md:sticky md:top-24">
-          <div className="bg-card-bg rounded-[20px] shadow-sm border border-border-subtle relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Cover Banner */}
-            <div className="h-28 w-full relative shrink-0 bg-slate-200 group">
-              <img 
-                src={coverUrl} 
-                alt="Profile Cover" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" 
+        <div className="bg-[var(--color-surface)] rounded-[2.5rem] p-6 sm:p-8 shadow-[var(--shadow-card-val)] flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden shrink-0 shadow-md bg-[var(--color-surface-2)]">
+              <img
+                src={student.avatar}
+                alt={student.name}
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/20"></div>
-              <button 
-                onClick={() => setPhotoModalState({ isOpen: true, type: 'cover' })}
-                title="Change Cover Photo"
-                className="absolute top-3 right-3 px-2.5 py-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full flex items-center gap-1.5 text-white transition-all shadow-md active:scale-95 group/btn"
-              >
-                <Camera size={13} className="stroke-[2.5]" />
-                <span className="text-[11px] font-bold">Edit Cover</span>
-              </button>
+              <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-[#ccff00]" title="Active Student" />
             </div>
 
-            <div className="px-5 pb-5 relative z-10">
-              {/* Header section with Avatar and Edit action */}
-              <div className="flex justify-between items-start mb-2">
-                <div className="relative -mt-[48px]">
-                  {/* Avatar */}
-                  <div 
-                    onClick={() => setPhotoModalState({ isOpen: true, type: 'avatar' })}
-                    title="Change Profile Photo"
-                    className="w-[96px] h-[96px] rounded-full border-[4px] border-card-bg overflow-hidden relative shadow-md z-10 bg-[var(--color-button)]/10 cursor-pointer group"
-                  >
-                    <img 
-                      src={avatarUrl} 
-                      alt={fullName} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Camera size={20} className="text-white drop-shadow" />
-                    </div>
-                  </div>
-
-                  {/* Camera Badge Icon on bottom-right of avatar */}
-                  <button
-                    onClick={() => setPhotoModalState({ isOpen: true, type: 'avatar' })}
-                    title="Change Profile Photo"
-                    className="absolute -bottom-1 right-0 z-20 w-7 h-7 rounded-full bg-[var(--color-button)] hover:bg-[var(--color-button-hover)] text-white flex items-center justify-center shadow-md border-2 border-card-bg transition-transform active:scale-90"
-                  >
-                    <Camera size={12} strokeWidth={2.5} />
-                  </button>
-
-                  {/* Distinctive Status Badge to avoid copyright while keeping the vibe */}
-                  <div className="absolute -bottom-1 -left-2 rotate-[-8deg] z-20 drop-shadow-sm pointer-events-none">
-                    <div className="bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-[8px] rounded-tl-[2px] rounded-br-[2px] uppercase tracking-wider border-[2px] border-card-bg">
-                      {role === 'Student' ? '#RoommateSearch' : '#VerifiedManager'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Edit Profile Button */}
-                <button 
-                  onClick={() => handleAction('Edit Profile')}
-                  className="mt-3 w-8 h-8 rounded-full text-text-muted hover:text-[var(--color-accent)] hover:bg-[var(--color-button)]/5 flex items-center justify-center transition-colors shadow-sm bg-app-bg"
-                >
-                  <PenLine size={18} />
-                </button>
+            <div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-[22px] sm:text-[24px] font-semibold text-[var(--color-text-primary)] tracking-[-0.015em]">
+                  {student.name}
+                </h1>
+                <span className="text-[12px] text-[#15803d] font-medium flex items-center gap-1">
+                  <ShieldCheck size={14} /> Verified Student
+                </span>
               </div>
 
-              {/* User Info */}
-              <div className="flex flex-col mt-1">
-                <h2 className="text-[1.3rem] font-bold text-text-primary leading-tight tracking-tight mb-1">{fullName}</h2>
-                <p className="text-[0.95rem] text-text-primary font-medium leading-snug">{role === 'Student' ? `${levelText}${role}` : role}</p>
-                <p className="text-[0.85rem] text-text-primary/80 mt-0.5">{university}</p>
-                <div className="flex flex-col mt-3 gap-1.5 text-[0.85rem] text-text-muted leading-relaxed">
-                  <span>{email}</span>
-                  <span className="text-[var(--color-accent)] font-medium hover:underline cursor-pointer transition-colors w-max">54 connections</span>
-                </div>
-              </div>
+              <p className="text-[13px] font-medium text-[var(--color-text-primary)] mt-1">
+                {student.department} · {student.level}
+              </p>
+              <p className="text-[12px] text-[var(--color-text-secondary)] mt-0.5 tabular-nums">
+                {student.university} · ID: <span className="text-[var(--color-text-primary)] font-medium">{student.id}</span>
+              </p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/saved')}
+              className="px-5 py-3 rounded-full bg-[var(--color-surface-2)] text-[13px] font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)] transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+            >
+              <Heart size={14} className="text-rose-500 fill-rose-500" />
+              <span className="tabular-nums">Saved ({savedProperties.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="px-6 py-3 rounded-full bg-[#ccff00] text-[#111315] text-[13px] font-semibold hover:bg-[#b8e600] transition-all cursor-pointer shadow-md flex items-center gap-2"
+            >
+              <Compass size={15} className="text-[#111315]" />
+              <span>Browse Hostels</span>
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Settings & Preferences */}
-        <div className="flex-1 flex flex-col gap-6 md:gap-8 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Opportunities Feature */}
-          {role === 'Student' && <OpportunitiesSection />}
-
-          {/* Settings Grid (If many, we can grid them, but a vertical list per section is typical for profile menus) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[100ms]">
+          <div className="lg:col-span-2 space-y-6">
             
-            {/* Account Group */}
-            <div className="bg-card-bg rounded-[20px] shadow-sm border border-border-subtle overflow-hidden h-fit">
-              <div className="px-5 py-3.5 border-b border-border-subtle bg-app-bg/30">
-                <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-wider">Account</span>
+            <div className="flex items-center justify-between pb-1">
+              <div className="flex items-center gap-2">
+                <CalendarCheck size={18} className="text-[var(--color-text-primary)]" />
+                <h2 className="text-[18px] sm:text-[20px] font-semibold text-[var(--color-text-primary)] tracking-[-0.01em]">
+                  My Hostel Reservations
+                </h2>
               </div>
-              <div className="flex flex-col">
-                {/* Account Type & Role Switcher */}
-                <button 
-                  onClick={() => openRoleModal()} 
-                  className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group"
-                >
-                  <div className="w-9 h-9 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                    <Hotel size={18} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="block text-[0.95rem] font-semibold text-text-primary leading-tight">
-                      Account Type & Role
-                    </span>
-                    <span className="text-xs text-text-muted mt-0.5 block truncate">
-                      {isManager ? 'Hostel / Property Manager' : 'Student'} · Click to switch role
-                    </span>
-                  </div>
-                  <span className="text-xs bg-[var(--color-accent)]/15 text-[var(--color-accent)] px-2.5 py-1 rounded-full font-bold shrink-0">
-                    Switch
-                  </span>
-                </button>
-
-                <button onClick={() => navigate('/referrals')} className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <User size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Refer a Friend</span>
-                  <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold mr-1">Earn ₵</span>
-                </button>
-                <button onClick={() => handleAction('Personal Information')} className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-[var(--color-accent-muted)] text-[var(--color-accent)] flex items-center justify-center shrink-0">
-                    <User size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Personal Information</span>
-                </button>
-                <button onClick={() => handleAction('Payment Methods')} className="flex items-center gap-3 w-full p-4 text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-teal-light text-teal flex items-center justify-center shrink-0">
-                    <CreditCard size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Payment Methods</span>
-                </button>
-              </div>
+              <span className="text-[13px] font-medium text-[var(--color-text-secondary)] tabular-nums">
+                {bookings.length} {bookings.length === 1 ? 'allocation' : 'allocations'}
+              </span>
             </div>
 
-            {/* Preferences Group */}
-            <div className="bg-card-bg rounded-[20px] shadow-sm border border-border-subtle overflow-hidden h-fit">
-              <div className="px-5 py-3.5 border-b border-border-subtle bg-app-bg/30">
-                <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-wider">Preferences</span>
-              </div>
-              <div className="flex flex-col">
-                <button onClick={() => handleAction('Notifications')} className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-amber-light text-amber-glow flex items-center justify-center shrink-0">
-                    <Bell size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Notifications</span>
-                </button>
-                <button onClick={() => handleAction('Privacy & Security')} className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                    <Shield size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Privacy & Security</span>
-                </button>
-                <ThemeRow />
-                <button onClick={() => toggleFullscreen()} className="flex items-center gap-3 w-full p-4 text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group border-t border-border-subtle">
-                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                    {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">{isFullscreen ? 'Exit Full Screen' : 'Go Full Screen'}</span>
-                </button>
-              </div>
-            </div>
+            {bookings.length > 0 ? (
+              <div className="space-y-5">
+                {bookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="bg-[var(--color-surface)] rounded-[2rem] p-5 sm:p-6 shadow-[var(--shadow-card-val)] flex flex-col sm:flex-row gap-5"
+                  >
+                    <div className="relative w-full sm:w-44 h-36 rounded-2xl overflow-hidden shrink-0 bg-[var(--color-surface-2)]">
+                      <img
+                        src={booking.propertyImg}
+                        alt={booking.propertyName}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute top-2.5 left-2.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#ccff00] text-[#111315]">
+                        {booking.status}
+                      </span>
+                    </div>
 
-            {/* Management Group for Managers or Host Invitation for Students */}
-            {isManager ? (
-              <div className="bg-card-bg rounded-[20px] shadow-sm border border-border-subtle overflow-hidden h-fit">
-                <div className="px-5 py-3.5 border-b border-border-subtle bg-app-bg/30">
-                  <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-wider">Management</span>
-                </div>
-                <div className="flex flex-col">
-                  <button onClick={() => navigate("/manager/dashboard")} className="flex items-center gap-3 w-full p-4 text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                    <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                      <FileText size={18} />
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="text-[16px] sm:text-[18px] font-semibold text-[var(--color-text-primary)] leading-snug">
+                              {booking.propertyName}
+                            </h3>
+                            <p className="text-[13px] text-[var(--color-text-secondary)] flex items-center gap-1 mt-0.5">
+                              <MapPin size={13} className="text-[var(--color-text-primary)] shrink-0" />
+                              <span className="truncate">{booking.propertyLoc}</span>
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <span className="text-[11px] text-[var(--color-text-secondary)] block">Ref Code</span>
+                            <div className="text-[13px] font-semibold text-[var(--color-text-primary)] tabular-nums">
+                              {booking.bookingRef}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 mt-4 py-3 bg-[var(--color-surface-2)] rounded-xl px-4 text-[13px]">
+                          <div>
+                            <span className="text-[12px] text-[var(--color-text-secondary)] block">Room</span>
+                            <span className="font-medium text-[var(--color-text-primary)] truncate block mt-0.5">{booking.roomType}</span>
+                          </div>
+                          <div>
+                            <span className="text-[12px] text-[var(--color-text-secondary)] block">Term</span>
+                            <span className="font-medium text-[var(--color-text-primary)] truncate block mt-0.5">{booking.semester}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 mt-4 pt-1">
+                        <div>
+                          <span className="text-[12px] text-[var(--color-text-secondary)] block">Semester Rent</span>
+                          <span className="text-[17px] font-semibold text-[var(--color-text-primary)] tabular-nums">
+                            {formatPrice(booking.totalPrice, '')}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleCancelReservation(booking.id, booking.propertyName)}
+                            className="p-2.5 rounded-full text-[#b91c1c] hover:bg-red-600/10 transition-colors cursor-pointer"
+                            title="Cancel reservation"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setActiveVoucher(booking)}
+                            className="px-4 py-2 rounded-full bg-[var(--color-island-bg)] hover:bg-[var(--color-island-hover)] text-[13px] font-semibold text-[#ccff00] transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+                          >
+                            <QrCode size={14} className="text-[#ccff00]" />
+                            <span>Room Voucher</span>
+                          </button>
+                        </div>
+                      </div>
+
                     </div>
-                    <div className="flex-1">
-                      <span className="block text-[0.95rem] font-semibold text-text-primary">Property Manager Dashboard</span>
-                      <span className="text-xs text-text-muted">Manage hostels, rooms, GPS location, and bookings</span>
-                    </div>
-                    <ChevronRight size={16} className="text-text-muted" />
-                  </button>
-                </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-amber-500/10 via-card-bg to-card-bg rounded-[20px] shadow-sm border border-amber-500/30 overflow-hidden h-fit p-5">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/20">
-                    <Hotel size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[0.95rem] font-bold text-text-primary">Are you a Hostel Owner?</h3>
-                    <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                      List student hostels, manage rooms, configure semester pricing, and take bookings.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => openRoleModal()}
-                      className="mt-3.5 px-3.5 py-1.5 rounded-xl bg-[var(--color-button)] text-white text-xs font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer"
-                    >
-                      Switch to Hostel Manager Mode
-                    </button>
-                  </div>
-                </div>
+              <div className="p-8 rounded-[2rem] bg-[var(--color-surface)] text-center flex flex-col items-center justify-center gap-3 shadow-[var(--shadow-card-val)]">
+                <CalendarCheck size={32} className="text-[var(--color-text-secondary)]" />
+                <h3 className="text-[16px] font-semibold text-[var(--color-text-primary)]">No active room bookings</h3>
+                <p className="text-[13px] text-[var(--color-text-secondary)] max-w-sm leading-relaxed">
+                  You have not reserved a hostel room for Academic Year 2026/2027 yet. Find a verified residence to lock in your semester allocation.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="mt-2 px-5 py-2.5 rounded-full bg-[#ccff00] hover:bg-[#b8e600] text-[#111315] text-[13px] font-semibold cursor-pointer shadow-md"
+                >
+                  Find Hostels Now
+                </button>
               </div>
             )}
 
-            {/* Support Group */}
-            <div className="bg-card-bg rounded-[20px] shadow-sm border border-border-subtle overflow-hidden h-fit">
-              <div className="px-5 py-3.5 border-b border-border-subtle bg-app-bg/30">
-                <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-wider">Support</span>
+            <div className="bg-[var(--color-surface)] rounded-[2rem] p-6 shadow-[var(--shadow-card-val)] space-y-4">
+              <div className="flex items-center justify-between pb-1">
+                <div className="flex items-center gap-2">
+                  <Sliders size={16} className="text-[var(--color-text-primary)]" />
+                  <h3 className="text-[16px] font-semibold text-[var(--color-text-primary)]">
+                    Roommate & Living Preferences
+                  </h3>
+                </div>
+                <span className="text-[12px] font-medium text-[#15803d]">
+                  Profile Active
+                </span>
               </div>
-              <div className="flex flex-col">
-                <button onClick={() => handleAction('Help Center')} className="flex items-center gap-3 w-full p-4 border-b border-border-subtle text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-[#fef3c7] text-[#d97706] flex items-center justify-center shrink-0">
-                    <HelpCircle size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Help Center</span>
-                </button>
-                <button onClick={() => handleAction('Terms & Policies')} className="flex items-center gap-3 w-full p-4 text-left bg-card-bg transition-colors hover:bg-app-bg cursor-pointer active:bg-[var(--color-surface-2)] group">
-                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                    <FileText size={18} />
-                  </div>
-                  <span className="flex-1 text-[0.95rem] font-semibold text-text-primary">Terms & Policies</span>
-                </button>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[13px]">
+                <div className="p-4 rounded-2xl bg-[var(--color-surface-2)]">
+                  <span className="text-[12px] font-normal text-[var(--color-text-secondary)] block">Study Habits</span>
+                  <p className="font-medium text-[var(--color-text-primary)] mt-1">Quiet study in room · Late night reviews</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[var(--color-surface-2)]">
+                  <span className="text-[12px] font-normal text-[var(--color-text-secondary)] block">Sleep Schedule</span>
+                  <p className="font-medium text-[var(--color-text-primary)] mt-1 tabular-nums">12:00 AM – 7:30 AM</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[var(--color-surface-2)]">
+                  <span className="text-[12px] font-normal text-[var(--color-text-secondary)] block">AC / Temperature</span>
+                  <p className="font-medium text-[var(--color-text-primary)] mt-1">Prefers AC on during night sleep</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[var(--color-surface-2)]">
+                  <span className="text-[12px] font-normal text-[var(--color-text-secondary)] block">Cleaning Rota</span>
+                  <p className="font-medium text-[var(--color-text-primary)] mt-1">Weekly alternating rota with roommate</p>
+                </div>
               </div>
             </div>
 
           </div>
 
-          {/* Logout Action */}
-          <div className="mt-4 mb-4 flex justify-start animate-in fade-in slide-in-from-bottom-4 duration-500 delay-[150ms]">
-            <button 
-              onClick={() => handleAction('Log Out')}
-              className="inline-flex items-center gap-2 text-coral font-bold text-[0.95rem] py-3.5 px-8 rounded-full bg-coral-light/20 border border-coral-light/50 active:scale-[0.97] transition-all hover:bg-coral-light/40"
-            >
-              <LogOut size={18} /> Log Out
-            </button>
+          <div className="space-y-6">
+            
+            <div className="bg-[var(--color-surface)] rounded-[2rem] p-6 shadow-[var(--shadow-card-val)] space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+                  Appearance
+                </h3>
+                <span className="text-[12px] font-medium text-[var(--color-text-secondary)]">
+                  {resolved === 'light' ? 'Light' : 'Ash'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-[var(--color-surface-2)]" role="radiogroup" aria-label="App theme">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={resolved === 'light'}
+                  onClick={() => {
+                    setMode('light');
+                    showToast('Light theme activated');
+                  }}
+                  className={`py-2.5 px-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    resolved === 'light'
+                      ? 'bg-[#ccff00] text-[#111315] shadow-sm'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <Sun size={15} />
+                  <span>Light</span>
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={resolved === 'dark'}
+                  onClick={() => {
+                    setMode('dark');
+                    showToast('Ash theme activated');
+                  }}
+                  className={`py-2.5 px-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    resolved === 'dark'
+                      ? 'bg-[#ccff00] text-[#111315] shadow-sm'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                  }`}
+                >
+                  <Moon size={15} />
+                  <span>Ash</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[var(--color-surface)] rounded-[2rem] p-6 shadow-[var(--shadow-card-val)] space-y-4">
+              <h3 className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+                Student Verification Dossier
+              </h3>
+
+              <div className="space-y-3.5 text-[14px]">
+                <div>
+                  <span className="text-[12px] text-[var(--color-text-secondary)] block mb-0.5">Institution</span>
+                  <span className="font-medium text-[var(--color-text-primary)]">{student.university}</span>
+                </div>
+                <div>
+                  <span className="text-[12px] text-[var(--color-text-secondary)] block mb-0.5">Student ID Number</span>
+                  <span className="font-medium text-[var(--color-text-primary)] tabular-nums">{student.id}</span>
+                </div>
+                <div>
+                  <span className="text-[12px] text-[var(--color-text-secondary)] block mb-0.5">Institutional Email</span>
+                  <span className="font-medium text-[var(--color-text-primary)]">{student.email}</span>
+                </div>
+                <div>
+                  <span className="text-[12px] text-[var(--color-text-secondary)] block mb-0.5">Primary Contact</span>
+                  <span className="font-medium text-[var(--color-text-primary)] tabular-nums">{student.phone}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[var(--color-surface)] rounded-[2rem] p-6 shadow-[var(--shadow-card-val)] space-y-3 text-[13px] text-[var(--color-text-secondary)]">
+              <div className="flex items-center gap-2 font-semibold text-[15px] text-[var(--color-text-primary)]">
+                <Phone size={15} className="text-[var(--color-text-primary)]" />
+                <span>Accommodation Warden Helpline</span>
+              </div>
+              <p className="leading-relaxed text-[var(--color-text-secondary)] text-[13px]">
+                Need to verify room keys, report maintenance, or discuss semester payment installments? Contact the student housing desk:
+              </p>
+              <div className="pt-1 font-semibold text-[var(--color-text-primary)] text-[16px] tabular-nums">
+                +233 30 294 8810
+              </div>
+            </div>
+
           </div>
 
         </div>
+
       </div>
 
-      {/* Interactive Photo Upload / Presets Modal */}
-      {user && (
-        <PhotoModal
-          isOpen={photoModalState.isOpen}
-          onClose={() => setPhotoModalState((prev) => ({ ...prev, isOpen: false }))}
-          userId={user.id}
-          type={photoModalState.type}
-          currentUrl={photoModalState.type === 'avatar' ? avatarUrl : coverUrl}
-          onSuccess={async () => {
-            if (refreshProfile) {
-              await refreshProfile();
-            }
-          }}
-        />
+      {activeVoucher && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div 
+            className="relative w-full max-w-md bg-[var(--color-modal-bg)] rounded-[2.5rem] shadow-2xl p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4">
+              <div>
+                <span className="text-[12px] font-medium text-[#15803d] dark:text-emerald-400">
+                  Verified Allocation
+                </span>
+                <h3 className="text-[20px] font-semibold text-[var(--color-modal-text)] tracking-[-0.01em]">
+                  Student Room Voucher
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveVoucher(null)}
+                className="w-9 h-9 rounded-full bg-[var(--color-modal-inset)] flex items-center justify-center text-[var(--color-modal-subtext)] hover:text-[var(--color-modal-text)] cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 flex flex-col items-center text-center">
+              <div className="p-4 bg-white rounded-2xl shadow-md mb-4">
+                <div className="w-36 h-36 bg-[#181b1f] p-2 rounded-xl flex items-center justify-center text-white">
+                  <QrCode size={110} />
+                </div>
+              </div>
+
+              <span className="text-[12px] text-[var(--color-modal-subtext)]">Voucher Code</span>
+              <div className="inline-flex items-center gap-2 mt-1.5 px-4 py-1.5 rounded-full bg-[#181b1f] text-[#ccff00] text-[20px] font-semibold tabular-nums">
+                <span>{activeVoucher.bookingRef}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(activeVoucher.bookingRef, 'Voucher code')}
+                  className="text-white hover:text-[#ccff00] cursor-pointer"
+                  title="Copy code"
+                >
+                  <Copy size={16} />
+                </button>
+              </div>
+
+              <div className="w-full mt-6 p-4 rounded-2xl bg-[var(--color-modal-inset)] text-left text-[13px] space-y-2.5">
+                <div className="flex justify-between gap-3">
+                  <span className="text-[var(--color-modal-subtext)]">Hostel</span>
+                  <span className="font-semibold text-[var(--color-modal-text)] text-right">{activeVoucher.propertyName}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-[var(--color-modal-subtext)]">Room</span>
+                  <span className="font-medium text-[var(--color-modal-text)] text-right">{activeVoucher.roomType}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-[var(--color-modal-subtext)]">Student</span>
+                  <span className="font-medium text-[var(--color-modal-text)] text-right tabular-nums">{activeVoucher.studentName} ({activeVoucher.studentId})</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-[var(--color-modal-subtext)]">Check-in</span>
+                  <span className="font-medium text-[var(--color-modal-text)] text-right tabular-nums">{activeVoucher.checkInDate}</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveVoucher(null)}
+              className="w-full py-4 rounded-full bg-[#ccff00] text-[#111315] text-[14px] font-semibold hover:bg-[#b8e600] transition-colors cursor-pointer shadow-md mt-2"
+            >
+              Close Voucher
+            </button>
+          </div>
+        </div>
       )}
+
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { AppState, ViewState, Property } from '../types';
+import { AppState, ViewState, Property, HostelBooking } from '../types';
 import { PROPERTIES as INITIAL_PROPERTIES } from '../data';
 import type { UserProfile, UserRole } from '../types/roles';
 import { isOwner } from '../types/roles';
@@ -23,6 +23,11 @@ interface AppContextType extends AppState, ViewState {
   user: any;
   toggleFullscreen: () => void;
   exitFullscreen: () => void;
+  
+  // Student Hostel Bookings
+  bookings: HostelBooking[];
+  addBooking: (booking: Omit<HostelBooking, 'id' | 'bookedAt' | 'bookingRef' | 'status'> & { status?: 'Confirmed' | 'Pending Review' | 'Checked In' }) => HostelBooking;
+  cancelBooking: (id: string) => void;
   
   // Payment & Referral additions
   hasPaidOpportunityHub: boolean;
@@ -49,6 +54,8 @@ interface AppContextType extends AppState, ViewState {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
   loginDemoUser: (role?: 'student' | 'manager', name?: string, email?: string) => void;
+  togglePersona: () => void;
+  persona: 'student' | 'manager';
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -63,6 +70,63 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Student Hostel Bookings State
+  const [bookings, setBookings] = useState<HostelBooking[]>(() => {
+    try {
+      const stored = localStorage.getItem('skycobe_student_bookings');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return [
+      {
+        id: 'book-1',
+        propertyId: 1,
+        propertyName: 'Akuafo Hall Annex (Platinum Wing)',
+        propertyLoc: 'UG Legon · 3 min walk to Balme Library',
+        propertyImg: '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
+        roomType: '2-in-a-Room Premium En-Suite',
+        semester: 'First Semester (Academic Year 2026/2027)',
+        totalPrice: 5200,
+        depositPaid: 2000,
+        studentName: 'Alex Owusu',
+        studentId: '10984721',
+        studentPhone: '+233 55 123 4567',
+        bookedAt: '2026-08-15',
+        status: 'Confirmed',
+        bookingRef: 'HAV-UG-8821',
+        checkInDate: '28 Aug 2026',
+      }
+    ];
+  });
+
+  const addBooking = (bookingData: Omit<HostelBooking, 'id' | 'bookedAt' | 'bookingRef' | 'status'> & { status?: 'Confirmed' | 'Pending Review' | 'Checked In' }): HostelBooking => {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const newBooking: HostelBooking = {
+      ...bookingData,
+      id: `book-${Date.now()}`,
+      bookedAt: new Date().toISOString().split('T')[0],
+      bookingRef: `HAV-UG-${randomNum}`,
+      status: bookingData.status || 'Confirmed',
+    };
+    setBookings((prev) => {
+      const updated = [newBooking, ...prev];
+      try {
+        localStorage.setItem('skycobe_student_bookings', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    return newBooking;
+  };
+
+  const cancelBooking = (id: string) => {
+    setBookings((prev) => {
+      const updated = prev.filter((b) => b.id !== id);
+      try {
+        localStorage.setItem('skycobe_student_bookings', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
   
   const [user, setUser] = useState<any | null | undefined>(undefined);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -71,12 +135,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const openRoleModal = () => setIsRoleModalOpen(true);
 
-  // Payment & Referral states
-  const [hasPaidOpportunityHub, setHasPaidOpportunityHubState] = useState(false);
-  const [earnedCredits, setEarnedCredits] = useState(0);
-  const [earnedCash, setEarnedCash] = useState(0);
-  const [referralCode, setReferralCode] = useState('');
-  const [referees, setReferees] = useState<{ name: string; status: string; date: string; amount?: number }[]>([]);
+  // Payment & Referral states (unlocked by default for preview exploration)
+  const [hasPaidOpportunityHub, setHasPaidOpportunityHubState] = useState(true);
+  const [earnedCredits, setEarnedCredits] = useState(150);
+  const [earnedCash, setEarnedCash] = useState(75);
+  const [referralCode, setReferralCode] = useState('HAVEN-ALEX24');
+  const [referees, setReferees] = useState<{ name: string; status: string; date: string; amount?: number }[]>([
+    { name: 'Kofi Mensah (UG)', status: 'Booked Room', date: '2 days ago', amount: 50 },
+    { name: 'Esi Frimpong (KNUST)', status: 'Verified Account', date: '1 week ago', amount: 25 },
+  ]);
 
   const setHasPaidOpportunityHub = (val: boolean) => {
     setHasPaidOpportunityHubState(val);
@@ -283,9 +350,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         } catch (e) {}
       }
 
-      if (!isAuthRedirect && isMounted) {
-        setUser(null);
-        setProfile(null);
+      // Auto-initialize seamless student persona so every UI and feature is immediately visible
+      const activePersona = (localStorage.getItem('skycobe_active_persona') as 'student' | 'manager') || 'student';
+      const defaultUser = {
+        id: activePersona === 'manager' ? 'demo-manager-id-01' : 'demo-student-id-01',
+        email: activePersona === 'manager' ? 'kofi.mensah@haven.edu.gh' : 'alex.owusu@st.ug.edu.gh',
+        user_metadata: {
+          first_name: activePersona === 'manager' ? 'Kofi' : 'Alex',
+          last_name: activePersona === 'manager' ? 'Mensah' : 'Owusu',
+          full_name: activePersona === 'manager' ? 'Kofi Mensah' : 'Alex Owusu',
+          account_type: activePersona,
+          role: activePersona,
+          university: 'University of Ghana, Legon',
+          level: '300',
+        }
+      };
+      if (isMounted) {
+        await handleUserSession(defaultUser);
         setProfileLoading(false);
       }
     };
@@ -424,7 +505,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             tags: h.amenities ? h.amenities.slice(0, 3) : [],
             category: "standard",
             avail: "Available",
-            img: h.image_url || "https://loremflickr.com/600/400/bedroom?lock=305",
+            img: h.image_url || "/src/assets/images/hero_student_residence_haven_1793064306511.jpg",
             desc: h.description,
             dbId: h.id,
             manager_id: h.manager_id
@@ -540,6 +621,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setProfileLoading(false);
   };
 
+  const persona: 'student' | 'manager' = (profile?.role === 'manager' || profile?.role === 'accommodation_owner' || profile?.role === 'property_owner') ? 'manager' : 'student';
+
+  const togglePersona = () => {
+    const nextRole = persona === 'student' ? 'manager' : 'student';
+    localStorage.setItem('skycobe_active_persona', nextRole);
+    loginDemoUser(nextRole);
+    showToast(nextRole === 'manager' ? 'Switched to Landlord / Manager Portal' : 'Switched to Student Discovery View');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -586,6 +676,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         referralCode,
         referees,
         loginDemoUser,
+        togglePersona,
+        persona,
+        bookings,
+        addBooking,
+        cancelBooking,
       }}
     >
       {children}

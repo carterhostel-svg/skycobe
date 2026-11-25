@@ -1,241 +1,56 @@
-import React from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, Compass, Heart, User, Bell, MessageSquare, Settings, HelpCircle, Map, Plus, Hotel } from "lucide-react";
-import { useAppContext } from "../../context/AppContext";
-import "../../pages/MobileHome.css";
-
-function cn(...classes: (string | undefined | null | false)[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { Home, Compass, Heart, User } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext';
 
 export function Navigation() {
-  const { user, profile, isSidebarOpen, toggleSidebar, openRoleModal } = useAppContext();
-  const navigate = useNavigate();
+  const { savedProperties, bookings } = useAppContext();
 
-  const CustomHomeIcon = ({ isActive, className }: { isActive: boolean, className?: string }) => (
-    <svg 
-      className={className}
-      width="18" 
-      height="18" 
-      viewBox="0 0 24 24" 
-      fill={isActive ? 'currentColor' : 'none'}
-      stroke={isActive ? 'none' : 'currentColor'}
-      strokeWidth={isActive ? '0' : '1.8'}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 2.5a2.5 2.5 0 00-1.6.58l-6.5 5.3A2.5 2.5 0 003 10.3V18a3 3 0 003 3h12a3 3 0 003-3v-7.7a2.5 2.5 0 00-.9-1.92l-6.5-5.3a2.5 2.5 0 00-1.6-.58z"></path>
-      {isActive && (
-        <rect x="9.5" y="14" width="5" height="2" rx="1" fill="var(--color-app-bg, #f4f4f4)" className="home-cutout"></rect>
-      )}
-    </svg>
-  );
-
-  const role = profile?.role || user?.user_metadata?.account_type || "student";
-  const isManager =
-    role === "manager" ||
-    role === "accommodation_owner" ||
-    role === "property_owner";
-
-  if (!user) return null;
-
-  const getNavItems = () => [
-    {
-      path: "/student/dashboard",
-      icon: Home,
-      label: "Home",
-    },
-    { path: "/explore", icon: Compass, label: "Explore" },
-    { path: "/saved", icon: Heart, label: "Saved" },
-    { path: "/profile", icon: User, label: "Profile" },
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home, end: true },
+    { path: '/explore', label: 'Explore', icon: Compass },
+    { path: '/saved', label: 'Saved', icon: Heart, count: savedProperties.length },
+    { path: '/profile', label: 'Profile', icon: User, count: bookings.length },
   ];
 
-  const currentNavItems = getNavItems();
-
   return (
-    <>
-      {/* MOBILE: Bottom Tab Bar */}
-      <div className="md:hidden fixed-nav-wrapper pointer-events-none" style={{ position: 'fixed', bottom: 'max(env(safe-area-inset-bottom), 1.5rem)', zIndex: 2000 }}>
-        <nav className="nav-bar pointer-events-auto">
-          <div className="nav-inner">
-            {currentNavItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  cn(
-                    "nav-item",
-                    isActive ? "active" : ""
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <div className="relative flex items-center justify-center">
-                      {item.label === "Profile" ? (
-                        <img 
-                          src={profile?.avatar_url || user?.user_metadata?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}
-                          alt="Profile" 
-                          className="w-[18px] h-[18px] rounded-full object-cover shrink-0" 
-                        />
-                      ) : item.label === "Home" ? (
-                        <CustomHomeIcon 
-                          isActive={isActive} 
-                          className="shrink-0 transition-colors duration-200" 
-                        />
-                      ) : (
-                        <item.icon
-                          className="shrink-0 transition-colors duration-200"
-                          size={18}
-                          strokeWidth={isActive ? 2.5 : 1.8}
-                        />
-                      )}
-                      {/* Badge Example */}
-                      {item.label === "Saved" && (
-                        <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[14px] h-[14px] px-[3px] text-[9px] font-bold text-white rounded-full border-[1.5px] border-app-bg bg-[var(--color-accent)] shadow-sm">
-                          3
-                        </span>
-                      )}
-                    </div>
-                    <span className="nav-text">{item.label}</span>
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
-
-        {/* Floating Action Button (FAB) */}
-        <button className="fab pointer-events-auto" onClick={() => navigate("/price-alerts")}>
-          <Plus size={22} strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* ALL OVERLAYS */}
-      {isSidebarOpen && (
-        <div 
-          className="hidden md:block fixed inset-0 bg-black/30 backdrop-blur-sm z-[90] transition-opacity" 
-          onClick={toggleSidebar}
-        />
-      )}
-
-      {/* DESKTOP/TABLET: Floating Sidebar */}
-      <nav
-        className={`hidden md:flex fixed left-4 top-[88px] bottom-6 z-[95] 
-                      w-64 flex-col transition-all duration-300 rounded-2xl shadow-2xl
-                      bg-card-bg border border-border-subtle py-4 px-3 overflow-y-auto ${
-                        !isSidebarOpen ? '-translate-x-[120%] opacity-0' : 'translate-x-0 opacity-100'
-                      }`}
+    <div className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+      {/* ── Mockup-matched Floating Capsule Dock (Pure Borderless Ash) ── */}
+      <nav 
+        aria-label="Main Navigation"
+        className="flex items-center gap-3 sm:gap-4 px-3.5 py-2.5 rounded-full bg-[#1e2126]/95 backdrop-blur-2xl shadow-[0_14px_40px_rgba(0,0,0,0.32)]"
       >
-        <div className="flex-1 space-y-1">
-          <div className="px-3 pb-2 pt-1 text-xs font-bold text-text-muted uppercase tracking-wider">
-            Main Menu
-          </div>
-          {currentNavItems.map((item) => (
-            <NavLink
-              onClick={toggleSidebar}
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium",
-                  isActive
-                    ? "bg-[var(--color-accent-muted)] text-[var(--color-accent)]"
-                    : "text-text-primary hover:bg-border-subtle",
-                )
-              }
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {item.label}
-            </NavLink>
-          ))}
-
-          {/* Dedicated Manager Section */}
-          {isManager && (
-            <NavLink
-              onClick={toggleSidebar}
-              to="/manager/dashboard"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-semibold",
-                  isActive
-                    ? "bg-amber-500/15 text-amber-500 border border-amber-500/30"
-                    : "text-amber-500 hover:bg-amber-500/10",
-                )
-              }
-            >
-              <Hotel className="w-5 h-5 flex-shrink-0" />
-              <span>Manager Dashboard</span>
-              <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded font-bold">
-                Hostel
-              </span>
-            </NavLink>
-          )}
-
-          <div className="px-3 pt-6 pb-2 text-xs font-bold text-text-muted uppercase tracking-wider">
-            Shortcuts
-          </div>
-          {[
-             { path: '/notifications', icon: Bell, label: 'Notifications' },
-             { path: '/messages', icon: MessageSquare, label: 'Messages' },
-             { path: '/settings', icon: Settings, label: 'Settings' },
-             { path: '/support', icon: HelpCircle, label: 'Help & Support' },
-             { path: '/campus-guide', icon: Map, label: 'Campus Guide' }
-          ].map((item) => (
-            <NavLink
-              onClick={toggleSidebar}
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium text-text-primary hover:bg-border-subtle"
-                )
-              }
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0 opacity-70" />
-              {item.label}
-            </NavLink>
-          ))}
-
-          {/* Switch to Hostel Owner Mode for students */}
-          {!isManager && (
-            <button
-              type="button"
-              onClick={() => {
-                toggleSidebar();
-                openRoleModal();
-              }}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium text-amber-500 hover:bg-amber-500/10 text-left cursor-pointer mt-1"
-            >
-              <Hotel className="w-5 h-5 flex-shrink-0 opacity-80" />
-              <span>Hostel Owner Portal</span>
-              <span className="ml-auto text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded font-bold">
-                Switch
-              </span>
-            </button>
-          )}
-        </div>
-        
-        <div className="border-t border-border-subtle pt-4 px-1 mt-4">
+        {navItems.map((item) => (
           <NavLink
-            onClick={toggleSidebar}
-            to="/profile"
-            className="flex items-center gap-3 px-2 py-2 hover:bg-border-subtle rounded-xl transition-colors"
+            key={item.path + item.label}
+            to={item.path}
+            end={item.end}
+            className={({ isActive }) =>
+              `relative transition-all duration-300 flex items-center justify-center cursor-pointer ${
+                isActive
+                  ? 'w-11 h-11 rounded-full bg-[#ccff00] text-black shadow-md scale-105'
+                  : 'w-10 h-10 rounded-full text-slate-300 hover:text-white hover:bg-white/10'
+              }`
+            }
           >
-            <div className="w-10 h-10 rounded-full bg-border-subtle flex items-center justify-center text-text-muted overflow-hidden flex-shrink-0">
-              <User className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium text-text-primary truncate">
-                {user?.user_metadata?.first_name || "Student"}
-              </span>
-              <span className="text-xs text-text-muted truncate">
-                View Profile
-              </span>
-            </div>
+            {({ isActive }) => (
+              <div className="relative flex items-center justify-center">
+                <item.icon
+                  size={isActive ? 20 : 19}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={isActive ? 'text-black' : 'text-slate-300 group-hover:text-white'}
+                />
+
+                {Boolean(!isActive && item.count && item.count > 0) && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-[16px] px-1 flex items-center justify-center text-[10px] font-semibold tabular-nums rounded-full bg-[#ccff00] text-[#111315] shadow-sm">
+                    {item.count}
+                  </span>
+                )}
+              </div>
+            )}
           </NavLink>
-        </div>
+        ))}
       </nav>
-    </>
+    </div>
   );
 }

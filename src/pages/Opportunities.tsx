@@ -19,17 +19,21 @@ export const Opportunities: React.FC = () => {
   const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
-  const [location, setLocation] = useState<StudentLocation | null>(null);
+  const [location, setLocation] = useState<StudentLocation | null>({
+    type: 'digital_address',
+    value: 'GA-123-4567 (UG Legon, Accra)',
+    resolvedCity: 'Accra',
+    lat: 5.65083,
+    lng: -0.18694
+  });
   const [selectedSector, setSelectedSector] = useState<CompanySector | 'all'>('all');
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  // Show location prompt automatically on load if no location is set
+  // Allow changing location via top prompt button
   useEffect(() => {
-    if (!location) {
-      setShowLocationPrompt(true);
-    }
-  }, [location]);
+    // Already seeded with Legon, Accra
+  }, []);
 
   useEffect(() => {
     if (location) {

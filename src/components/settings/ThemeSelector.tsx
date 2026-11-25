@@ -5,7 +5,7 @@ import React from 'react';
 
 const OPTIONS: { mode: ThemeMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'light',  label: 'Light',  icon: <Sun  size={16} /> },
-  { mode: 'dark',   label: 'Dark',   icon: <Moon size={16} /> },
+  { mode: 'dark',   label: 'Ash',    icon: <Moon size={16} /> },
   { mode: 'system', label: 'System', icon: <Monitor size={16} /> },
 ];
 
@@ -14,15 +14,14 @@ export function ThemeSelector() {
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-semibold uppercase tracking-widest"
+      <p className="text-[13px] font-medium"
          style={{ color: 'var(--color-text-secondary)' }}>
         Appearance
       </p>
 
-      {/* Segmented control pill */}
       <div
-        className="flex rounded-xl p-1 gap-1"
-        style={{ backgroundColor: 'var(--color-input-bg)', border: '1px solid var(--color-border)' }}
+        className="flex rounded-2xl p-1 gap-1"
+        style={{ backgroundColor: 'var(--color-surface-2)' }}
         role="radiogroup"
         aria-label="Choose app appearance"
       >
@@ -37,16 +36,16 @@ export function ThemeSelector() {
               onClick={() => setMode(opt.mode)}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2',
-                'h-9 rounded-lg text-sm font-medium',
+                'h-9 rounded-xl text-[13px] font-semibold cursor-pointer',
                 'transition-all duration-200 active:scale-95',
-                'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                'focus:outline-none',
               )}
               style={
                 isActive
                   ? {
-                      backgroundColor: 'var(--color-elevated)',
-                      color: 'var(--color-accent)',
-                      boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                      backgroundColor: '#ccff00',
+                      color: '#111315',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
                     }
                   : {
                       backgroundColor: 'transparent',
@@ -61,9 +60,8 @@ export function ThemeSelector() {
         })}
       </div>
 
-      {/* Helper text — explains system mode */}
       {mode === 'system' && (
-        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="text-[12px]" style={{ color: 'var(--color-text-secondary)' }}>
           Follows your device's display settings automatically.
         </p>
       )}

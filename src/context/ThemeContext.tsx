@@ -23,7 +23,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = 'skycobe_theme_mode';
+const STORAGE_KEY = 'skycobe_theme_v2';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -53,10 +53,9 @@ function applyTheme(resolved: ResolvedTheme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(() => {
-    // Read from localStorage on first render
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
     if (stored && ['light', 'dark', 'system'].includes(stored)) return stored;
-    return 'system'; // default to system preference
+    return 'light';
   });
 
   const [resolved, setResolved] = useState<ResolvedTheme>(() =>

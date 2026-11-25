@@ -1,110 +1,144 @@
 /* src/styles/tokens.css */
 /* ─────────────────────────────────────────────────────────────────────────── */
-/* SKYCOBE Design Tokens                                                        */
-/* All components use var(--color-*) — never raw hex codes.                    */
+/* HAVEN · SKYCOBE Campus Living Design System Tokens                          */
+/* Light Theme (Mineral Alabaster + Electric Lemon Green #ccff00)            */
+/* Ash Theme (Signature Ash #bababa + Electric Lemon Green #ccff00)            */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-:root {
-  /* ── Surfaces ─────────────────────────────────────────────────────────── */
-  --color-bg:           #ffffff;
-  --color-surface:      #f8f9fa;
-  --color-surface-2:    #f1f3f5;
-  --color-elevated:     #ffffff;
-  --color-overlay:      rgba(0, 0, 0, 0.5);
+:root,
+[data-theme="light"] {
+  /* ── Light Theme: Mineral Alabaster & Lemon Green ──────────────────────── */
+  --color-bg:               #f4f5f2; /* Soft mineral off-white harmonized for #ccff00 */
+  --color-surface:          #ffffff; /* Crisp borderless white card surface */
+  --color-surface-2:        #eaede7; /* Pale botanical stone chip / input surface */
+  --color-surface-hover:    #e1e5dd; /* Hover fill for stone chips & buttons */
+  --color-elevated:         #ffffff;
+  --color-cover-fade:       #f4f5f2;
+  --color-overlay:          rgba(17, 19, 21, 0.55);
 
-  /* ── Borders ──────────────────────────────────────────────────────────── */
-  --color-border:       rgba(0, 0, 0, 0.08);
-  --color-border-strong: rgba(0, 0, 0, 0.16);
+  /* ── Contrast Islands (Nav dock, selected tiers, overlay anchors) ──────── */
+  --color-island-bg:        #181b1f;
+  --color-island-hover:     #24282e;
+  --color-island-text:      #ffffff;
+  --color-island-muted:     #b4bcc6;
 
-  /* ── Text ─────────────────────────────────────────────────────────────── */
-  --color-text-primary:   #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-disabled:  #9ca3af;
-  --color-text-inverse:   #ffffff;
+  /* ── Modal Surfaces (Crisp white modal in Light theme) ─────────────────── */
+  --color-modal-bg:         #ffffff;
+  --color-modal-header:     #f4f5f2;
+  --color-modal-inset:      #f1f3ee;
+  --color-modal-inset-hover:#e7eae2;
+  --color-modal-text:       #111315;
+  --color-modal-subtext:    #4b525c;
+  --color-modal-accent:     #435900; /* High-contrast olive-lime ink on light surfaces */
 
-  /* ── Headings ─────────────────────────────────────────────────────────── */
-  --color-heading:        #000000;
+  /* ── Borders & Hairlines (Borderless Aesthetic) ────────────────────────── */
+  --color-border:           transparent;
+  --color-border-subtle:    transparent;
+  --color-border-strong:    transparent;
 
-  /* ── Brand accent (custom green) ─────────────────── */
-  --color-accent:         #178053;
-  --color-accent-hover:   #126441;
-  --color-accent-muted:   rgba(23, 128, 83, 0.12);
-  --color-accent-text:    #178053;
+  /* ── Typography (3-Tier Slate/Charcoal Ink Hierarchy) ──────────────────── */
+  --color-text-primary:     #111315;
+  --color-text-secondary:   #4b525c;
+  --color-text-muted-card:  #4b525c;
+  --color-text-disabled:    #6f7782;
+  --color-text-inverse:     #ffffff;
+  --color-heading:          #111315;
 
-  /* ── Highlight (MTN-inspired amber — stat labels, badges, CTAs) ────────── */
-  --color-highlight:      #f59e0b;
-  --color-highlight-muted: rgba(245, 158, 11, 0.12);
-  --color-on-highlight:   #000000;
+  /* ── Brand Signature Accent (Electric Lemon Green) ─────────────────────── */
+  --color-accent:           #ccff00;
+  --color-accent-hover:     #b8e600;
+  --color-accent-bar:       #b0dc00; /* Crisp lemon-green underline on light alabaster */
+  --color-accent-muted:     #ecf4cb;
+  --color-accent-ink:       #435900;
+  --color-accent-text:      #111315;
 
-  /* ── Status ───────────────────────────────────────────────────────────── */
-  --color-success:  #16a34a;
-  --color-warning:  #d97706;
-  --color-error:    #dc2626;
-  --color-info:     #2563eb;
+  /* ── Secondary Highlight ───────────────────────────────────────────────── */
+  --color-highlight:        #ccff00;
+  --color-highlight-muted:  #ecf4cb;
+  --color-on-highlight:     #111315;
 
-  /* ── Component shorthands ─────────────────────────────────────────────── */
-  --color-nav-bg:       #ffffff;
-  --color-card-bg:      #ffffff;
-  --color-input-bg:     #f8f9fa;
-  --color-header-bg:    #ffffff;
+  /* ── Functional Status Tones ───────────────────────────────────────────── */
+  --color-success:          #15803d;
+  --color-warning:          #b45309;
+  --color-error:            #b91c1c;
+  --color-info:             #0369a1;
 
-  /* ── Buttons ──────────────────────────────────────────────────────────── */
-  --color-button:       #0f172a;       /* slate-900 for light theme */
-  --color-button-hover: #000000;
-  --color-button-text:  #ffffff;
-  --shadow-button:      0 4px 12px rgba(15, 23, 42, 0.15);
+  /* ── Component Surfaces ────────────────────────────────────────────────── */
+  --color-nav-bg:           rgba(24, 27, 31, 0.96);
+  --color-card-bg:          #ffffff;
+  --color-input-bg:         #eaede7;
+  --color-header-bg:        rgba(244, 245, 242, 0.94);
+
+  /* ── Primary Action Buttons (Zero Lemon Glow — Crisp Neutral Shadows) ──── */
+  --color-button:           #ccff00;
+  --color-button-hover:     #b8e600;
+  --color-button-text:      #111315;
+  --shadow-button:          0 4px 14px rgba(17, 19, 21, 0.12);
+  --shadow-widget-val:      0 2px 10px rgba(17, 19, 21, 0.05);
+  --shadow-card-val:        0 12px 32px rgba(17, 19, 21, 0.07);
+  --shadow-float-val:       0 16px 40px rgba(17, 19, 21, 0.14);
 }
 
-/* ── DARK THEME ─────────────────────────────────────────────────────────── */
-/* Applied via [data-theme="dark"] on <html> — set by ThemeProvider.         */
-
 [data-theme="dark"] {
-  /* ── Surfaces — MTN Ghana dark palette ───────────────────────────────── */
-  --color-bg:           #121212;   /* page background — true charcoal        */
-  --color-surface:      #1e1e1e;   /* card surfaces — lifted from bg         */
-  --color-surface-2:    #2a2a2a;   /* modals, sheets, dropdowns              */
-  --color-elevated:     #2a2a2a;
-  --color-overlay:      rgba(0, 0, 0, 0.7);
+  /* ── Ash Theme: Signature Ash Silver (#bababa) & Lemon Green ───────────── */
+  --color-bg:               #bababa;
+  --color-surface:          #d2d2d2;
+  --color-surface-2:        #dcdcdc;
+  --color-surface-hover:    #e5e5e5;
+  --color-elevated:         #e4e4e4;
+  --color-cover-fade:       #bababa;
+  --color-overlay:          rgba(20, 22, 25, 0.65);
 
-  /* ── Borders ──────────────────────────────────────────────────────────── */
-  --color-border:       rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-island-bg:        #22252a;
+  --color-island-hover:     #2d3138;
+  --color-island-text:      #ffffff;
+  --color-island-muted:     #cbd5e1;
 
-  /* ── Text ─────────────────────────────────────────────────────────────── */
-  --color-text-primary:   #ffffff;
-  --color-text-secondary: #9e9e9e;
-  --color-text-disabled:  #616161;
-  --color-text-inverse:   #111827;
+  --color-modal-bg:         #24282c;
+  --color-modal-header:     #1a1d20;
+  --color-modal-inset:      #1d2125;
+  --color-modal-inset-hover:#262b32;
+  --color-modal-text:       #ffffff;
+  --color-modal-subtext:    #cbd5e1;
+  --color-modal-accent:     #ccff00;
 
-  /* ── Headings ─────────────────────────────────────────────────────────── */
-  --color-heading:        #ffffff;
+  --color-border:           transparent;
+  --color-border-subtle:    transparent;
+  --color-border-strong:    transparent;
 
-  /* ── Brand accent (custom green) ────────────────────────────────────────────── */
-  --color-accent:         #178053;   /* custom green */
-  --color-accent-hover:   #21a66c;
-  --color-accent-muted:   rgba(23, 128, 83, 0.15);
-  --color-accent-text:    #178053;
+  --color-text-primary:     #111315;
+  --color-text-secondary:   #3b4048;
+  --color-text-muted-card:  #4b525c;
+  --color-text-disabled:    #5c636e;
+  --color-text-inverse:     #ffffff;
+  --color-heading:          #111315;
 
-  /* ── Highlight (amber — MTN-inspired) ────────────────────────────────── */
-  --color-highlight:      #fbbf24;
-  --color-highlight-muted: rgba(251, 191, 36, 0.15);
-  --color-on-highlight:   #000000;
+  --color-accent:           #ccff00;
+  --color-accent-hover:     #b8e600;
+  --color-accent-bar:       #ccff00;
+  --color-accent-muted:     rgba(204, 255, 0, 0.25);
+  --color-accent-ink:       #111315;
+  --color-accent-text:      #111315;
 
-  /* ── Status ───────────────────────────────────────────────────────────── */
-  --color-success:  #4ade80;
-  --color-warning:  #fbbf24;
-  --color-error:    #f87171;
-  --color-info:     #60a5fa;
+  --color-highlight:        #ccff00;
+  --color-highlight-muted:  rgba(204, 255, 0, 0.25);
+  --color-on-highlight:     #111315;
 
-  /* ── Component shorthands ─────────────────────────────────────────────── */
-  --color-nav-bg:       #1a1a1a;   /* nav — slightly darker than cards       */
-  --color-card-bg:      #1e1e1e;
-  --color-input-bg:     #2a2a2a;
-  --color-header-bg:    #1a1a1a;
+  --color-success:          #15803d;
+  --color-warning:          #b45309;
+  --color-error:            #b91c1c;
+  --color-info:             #0369a1;
 
-  /* ── Buttons ──────────────────────────────────────────────────────────── */
-  --color-button:       var(--color-accent);
-  --color-button-hover: var(--color-accent-hover);
-  --color-button-text:  #ffffff;
-  --shadow-button:      0 4px 12px var(--color-accent-muted);
+  --color-nav-bg:           rgba(30, 33, 38, 0.95);
+  --color-card-bg:          #d2d2d2;
+  --color-input-bg:         #dcdcdc;
+  --color-header-bg:        rgba(186, 186, 186, 0.94);
+
+  --color-button:           #ccff00;
+  --color-button-hover:     #b8e600;
+  --color-button-text:      #111315;
+  --shadow-button:          0 6px 20px rgba(0, 0, 0, 0.16);
+  --shadow-widget-val:      0 2px 10px rgba(0, 0, 0, 0.06);
+  --shadow-card-val:        0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-float-val:       0 16px 40px rgba(0, 0, 0, 0.20);
 }

@@ -1,136 +1,320 @@
-import React from 'react';
-import { PageHeader } from '../components/layout/PageHeader';
-import { Search, MessageSquare, Send, Paperclip, MoreVertical } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Send, CheckCheck, Phone, ShieldCheck, MoreVertical, MessageSquare } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
-export const Messages = () => {
+interface Message {
+  id: string;
+  sender: 'user' | 'other';
+  text: string;
+  time: string;
+}
+
+interface Thread {
+  id: string;
+  name: string;
+  role: string;
+  property: string;
+  initials: string;
+  avatarBg: string;
+  lastMessage: string;
+  time: string;
+  unread: boolean;
+  phone: string;
+  messages: Message[];
+}
+
+const INITIAL_THREADS: Thread[] = [
+  {
+    id: 't1',
+    name: 'Mrs. Sarah Jenkins',
+    role: 'Property Manager',
+    property: 'Pentagon Annex, UG Legon',
+    initials: 'SJ',
+    avatarBg: 'bg-teal-600',
+    lastMessage: 'Yes, the Private Single Room is reserved for your tour this Friday.',
+    time: '10:42 AM',
+    unread: true,
+    phone: '+233 24 411 2233',
+    messages: [
+      { id: 'm1', sender: 'user', text: "Hello Mrs. Jenkins, I'm Alex from UG Legon. Is the Private Room with generator still available for next semester?", time: '10:35 AM' },
+      { id: 'm2', sender: 'other', text: "Good morning Alex! Yes, we have two private rooms remaining on Block B, second floor.", time: '10:38 AM' },
+      { id: 'm3', sender: 'user', text: "That's great! Does the semester fee include water and WiFi?", time: '10:40 AM' },
+      { id: 'm4', sender: 'other', text: "Yes, water is 24/7 borehole and WiFi is unlimited. The generator kicks in within 60 seconds of any ECG outage.", time: '10:41 AM' },
+      { id: 'm5', sender: 'other', text: 'Yes, the Private Single Room is reserved for your tour this Friday.', time: '10:42 AM' },
+    ],
+  },
+  {
+    id: 't2',
+    name: 'Evandy Desk Official',
+    role: 'Front Office',
+    property: 'Evandy Residence, Legon Campus',
+    initials: 'ED',
+    avatarBg: 'bg-slate-700',
+    lastMessage: 'Your booking reservation request #EV-9821 has been acknowledged.',
+    time: 'Yesterday',
+    unread: false,
+    phone: '+233 20 890 1234',
+    messages: [
+      { id: 'm20', sender: 'other', text: 'Your booking reservation request #EV-9821 has been acknowledged.', time: 'Yesterday 3:15 PM' },
+    ],
+  },
+  {
+    id: 't3',
+    name: 'Kwame Boateng',
+    role: 'Potential Roommate',
+    property: 'Bani Property, UG Legon',
+    initials: 'KB',
+    avatarBg: 'bg-amber-600',
+    lastMessage: 'Hey Alex, do you prefer a quiet room or are you cool with study groups?',
+    time: '2 days ago',
+    unread: false,
+    phone: '+233 55 123 9876',
+    messages: [
+      { id: 'm30', sender: 'other', text: 'Hey Alex, do you prefer a quiet room or are you cool with study groups?', time: '2 days ago' },
+    ],
+  },
+];
+
+export const Messages: React.FC = () => {
+  const { showToast } = useAppContext();
+  const [threads, setThreads] = useState<Thread[]>(INITIAL_THREADS);
+  const [activeThreadId, setActiveThreadId] = useState<string>(INITIAL_THREADS[0].id);
+  const [inputText, setInputText] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0];
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      sender: 'user',
+      text: inputText.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setThreads((prev) =>
+      prev.map((t) =>
+        t.id === activeThreadId
+          ? {
+              ...t,
+              lastMessage: newMessage.text,
+              time: 'Just now',
+              messages: [...t.messages, newMessage],
+            }
+          : t
+      )
+    );
+    setInputText('');
+
+    // Simulate landlord reply
+    setTimeout(() => {
+      const replyMessage: Message = {
+        id: `reply-${Date.now()}`,
+        sender: 'other',
+        text: 'Received! Let me know if you need our caretaker to show you around upon arrival.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === activeThreadId
+            ? {
+                ...t,
+                lastMessage: replyMessage.text,
+                messages: [...t.messages, replyMessage],
+              }
+            : t
+        )
+      );
+    }, 1200);
+  };
+
+  const filteredThreads = threads.filter(
+    (t) =>
+      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.property.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="flex-1 w-full flex flex-col bg-app-bg min-h-screen">
-      <PageHeader title="Messages" />
-      
-      <div className="max-w-screen-xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 pb-20 flex-1 flex flex-col md:flex-row gap-6">
-        
-        {/* Left Side: Conversations List */}
-        <div className="w-full md:w-[320px] lg:w-[380px] shrink-0 bg-card-bg rounded-[20px] shadow-sm border border-border-subtle flex flex-col overflow-hidden h-[600px] md:h-[calc(100vh-140px)]">
-          <div className="p-4 border-b border-border-subtle shrink-0">
-            <h2 className="text-[1.1rem] font-bold text-text-primary mb-4 tracking-tight">Inbox</h2>
+    <div className="w-full flex-1 flex flex-col bg-[var(--color-bg)] font-sans">
+      {/* Top Header */}
+      <div className="border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-16 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--color-accent)]">
+                Direct Landlord & Desk Chat
+              </span>
+              <h1 className="text-2xl font-heading font-extrabold text-[var(--color-heading)] tracking-tight">
+                Messages
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200">
+                <ShieldCheck size={14} />
+                <span>Encrypted Host Inquiries</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6">
+        {/* Left Column: Thread List */}
+        <div className="w-full md:w-[340px] lg:w-[380px] shrink-0 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs flex flex-col overflow-hidden h-[620px]">
+          <div className="p-4 border-b border-[var(--color-border)]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search messages..." 
-                className="w-full pl-10 pr-4 py-2.5 bg-app-bg border border-border-subtle rounded-xl text-[0.9rem] focus:outline-none focus:border-[var(--color-accent)] transition-colors text-text-primary"
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-xs font-medium focus:outline-none focus:border-[var(--color-accent)] text-[var(--color-text-primary)] placeholder:text-slate-400"
               />
             </div>
           </div>
-          
-          <div className="flex-1 overflow-y-auto hide-scrollbar flex flex-col divide-y divide-border-subtle">
-            {/* Active Conversation Item */}
-            <div className="p-4 flex gap-3 items-center bg-app-bg/60 cursor-pointer border-l-4 border-l-[var(--color-accent)]">
-              <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border-subtle">
-                <img src="https://loremflickr.com/100/100/face?lock=41" alt="Avatar" className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="font-semibold text-[0.95rem] text-text-primary truncate">Sarah Jenkins</h3>
-                  <span className="text-[0.7rem] text-[var(--color-accent)] font-bold">10:42 AM</span>
-                </div>
-                <p className="text-[0.85rem] text-text-primary font-medium truncate">Yes, the room is still available.</p>
-              </div>
-              <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] shrink-0"></div>
-            </div>
 
-            {/* Inactive Conversation Items */}
-            {[
-              { name: 'Michael Osei', msg: 'Thanks for the virtual tour!', time: 'Yesterday' },
-              { name: 'Pentagon Properties', msg: 'Your lease agreement is attached.', time: 'Monday' },
-              { name: 'Evandy Support', msg: 'How can we help you today?', time: 'Oct 12' }
-            ].map((chat, i) => (
-              <div key={i} className="p-4 flex gap-3 items-center hover:bg-app-bg/40 cursor-pointer transition-colors border-l-4 border-l-transparent">
-                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-slate-200">
-                   <img src={`https://loremflickr.com/100/100/face?lock=${i+50}`} alt={chat.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline mb-1">
-                    <h3 className="font-semibold text-[0.95rem] text-text-primary truncate">{chat.name}</h3>
-                    <span className="text-[0.7rem] text-text-muted">{chat.time}</span>
+          <div className="flex-1 overflow-y-auto divide-y divide-[var(--color-border)] hide-scrollbar">
+            {filteredThreads.map((thread) => {
+              const isActive = thread.id === activeThreadId;
+              return (
+                <div
+                  key={thread.id}
+                  onClick={() => {
+                    setActiveThreadId(thread.id);
+                    setThreads((prev) =>
+                      prev.map((t) => (t.id === thread.id ? { ...t, unread: false } : t))
+                    );
+                  }}
+                  className={`p-4 flex gap-3 items-center cursor-pointer transition-colors ${
+                    isActive
+                      ? 'bg-teal-50/50 border-l-4 border-l-[var(--color-accent)]'
+                      : 'hover:bg-slate-50 border-l-4 border-l-transparent'
+                  }`}
+                >
+                  <div
+                    className={`w-11 h-11 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 ${thread.avatarBg}`}
+                  >
+                    {thread.initials}
                   </div>
-                  <p className="text-[0.85rem] text-text-secondary truncate">{chat.msg}</p>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-baseline mb-0.5">
+                      <h3 className="font-bold text-xs text-[var(--color-heading)] truncate">
+                        {thread.name}
+                      </h3>
+                      <span className="text-[10px] text-slate-400 font-medium shrink-0 ml-1">
+                        {thread.time}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--color-accent)] font-medium truncate mb-0.5">
+                      {thread.property}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-secondary)] truncate">
+                      {thread.lastMessage}
+                    </p>
+                  </div>
+
+                  {thread.unread && (
+                    <div className="w-2 h-2 rounded-full bg-[var(--color-accent)] shrink-0"></div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Right Side: Active Chat Area */}
-        <div className="hidden md:flex flex-1 bg-card-bg rounded-[20px] shadow-sm border border-border-subtle flex-col overflow-hidden h-[calc(100vh-140px)] relative">
-          
-          {/* Chat Header */}
-          <div className="px-6 py-4 border-b border-border-subtle flex justify-between items-center bg-app-bg/30 shrink-0">
+        {/* Right Column: Chat Window */}
+        <div className="flex-1 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs flex flex-col overflow-hidden h-[620px]">
+          {/* Header */}
+          <div className="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-surface)] shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-border-subtle">
-                <img src="https://loremflickr.com/100/100/face?lock=41" alt="Sarah" className="w-full h-full object-cover" />
+              <div
+                className={`w-10 h-10 rounded-full text-white font-bold text-xs flex items-center justify-center ${activeThread.avatarBg}`}
+              >
+                {activeThread.initials}
               </div>
               <div>
-                <h3 className="font-semibold text-[1rem] text-text-primary">Sarah Jenkins</h3>
-                <span className="text-[0.75rem] text-emerald-600 font-medium flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Online
-                </span>
+                <h3 className="font-bold text-sm text-[var(--color-heading)]">
+                  {activeThread.name}
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)]">
+                  {activeThread.role} · {activeThread.property}
+                </p>
               </div>
             </div>
-            <button className="w-10 h-10 rounded-full hover:bg-border-subtle flex items-center justify-center text-text-muted transition-colors">
-              <MoreVertical size={20} />
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  window.open(`https://wa.me/${activeThread.phone.replace(/[^0-9]/g, '')}`, '_blank');
+                  showToast('Opening WhatsApp link...');
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--color-border)] text-xs font-semibold hover:border-slate-400 transition-colors cursor-pointer text-[var(--color-text-primary)]"
+              >
+                <Phone size={13} />
+                <span>Call Host</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Message Stream */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[var(--color-bg)]/40 hide-scrollbar">
+            <div className="text-center my-2">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-[var(--color-surface)] border border-[var(--color-border)] px-2.5 py-1 rounded-full">
+                Booking Inquiries · Today
+              </span>
+            </div>
+
+            {activeThread.messages.map((msg) => {
+              const isUser = msg.sender === 'user';
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full`}
+                >
+                  <div
+                    className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
+                      isUser
+                        ? 'bg-slate-900 text-white rounded-br-xs'
+                        : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-bl-xs'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                  <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.time}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Input Form */}
+          <form
+            onSubmit={handleSendMessage}
+            className="p-3 border-t border-[var(--color-border)] bg-[var(--color-surface)] flex items-center gap-2"
+          >
+            <input
+              type="text"
+              placeholder="Type your question or booking request..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              className="flex-1 px-4 py-2.5 text-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-slate-400"
+            />
+            <button
+              type="submit"
+              className="p-2.5 rounded-lg bg-[var(--color-button)] text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Send Message"
+            >
+              <Send size={16} />
             </button>
-          </div>
-
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 hide-scrollbar bg-card-bg/50">
-            <div className="w-full flex justify-center">
-              <span className="text-[0.7rem] font-bold text-text-muted uppercase tracking-wider bg-app-bg px-3 py-1 rounded-full border border-border-subtle">Today</span>
-            </div>
-
-             {/* Sent Message */}
-             <div className="flex flex-col items-end w-full gap-1">
-                <div className="bg-[var(--color-button)] text-white px-5 py-3 rounded-2xl rounded-tr-sm max-w-[80%] lg:max-w-[70%] shadow-sm leading-relaxed text-[0.95rem]">
-                  Hi Sarah! I'm interested in the Private Room at Pentagon Annex. Is it still available for the upcoming semester?
-                </div>
-                <span className="text-[0.7rem] text-text-muted mr-1">10:38 AM</span>
-             </div>
-
-             {/* Received Message */}
-             <div className="flex items-end gap-2 w-full">
-                <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 mb-5">
-                  <img src="https://loremflickr.com/100/100/face?lock=41" alt="Sarah" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col items-start gap-1">
-                  <div className="bg-app-bg text-text-primary px-5 py-3 rounded-2xl rounded-tl-sm max-w-[80%] lg:max-w-[70%] shadow-sm border border-border-subtle leading-relaxed text-[0.95rem]">
-                    Yes, the room is still available.
-                  </div>
-                  <div className="bg-app-bg text-text-primary px-5 py-3 rounded-2xl rounded-tl-sm max-w-[80%] lg:max-w-[70%] shadow-sm border border-border-subtle leading-relaxed text-[0.95rem] mt-1">
-                    Would you like to schedule a virtual tour or book it right away?
-                  </div>
-                  <span className="text-[0.7rem] text-text-muted ml-1">10:42 AM</span>
-                </div>
-             </div>
-          </div>
-
-          {/* Chat Input */}
-          <div className="p-4 bg-app-bg/50 border-t border-border-subtle shrink-0">
-            <div className="bg-card-bg border border-border-subtle rounded-full p-2 flex items-center shadow-sm">
-              <button className="w-10 h-10 rounded-full hover:bg-app-bg flex items-center justify-center text-text-muted transition-colors shrink-0">
-                <Paperclip size={20} />
-              </button>
-              <input 
-                 type="text" 
-                 placeholder="Type your message..." 
-                 className="flex-1 bg-transparent px-3 py-2 text-[0.95rem] text-text-primary focus:outline-none placeholder:text-text-muted"
-              />
-              <button className="w-10 h-10 rounded-full bg-[var(--color-button)] flex items-center justify-center text-white transition-transform hover:scale-105 shrink-0 shadow-sm ml-1">
-                <Send size={18} className="translate-x-[1px] translate-y-[1px]" />
-              </button>
-            </div>
-          </div>
+          </form>
         </div>
-
       </div>
     </div>
   );

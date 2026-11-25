@@ -27,10 +27,10 @@ export const EditProfile: React.FC = () => {
   });
 
   const [coverUrl, setCoverUrl] = useState<string>(
-    profile?.cover_url || user?.user_metadata?.cover_url || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80"
+    profile?.cover_url || user?.user_metadata?.cover_url || "/src/assets/images/campus_quad_cover_1793064715898.jpg"
   );
   const [avatarUrl, setAvatarUrl] = useState<string>(
-    profile?.avatar_url || user?.user_metadata?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+    profile?.avatar_url || user?.user_metadata?.avatar_url || "/src/assets/images/student_alex_avatar_1793064702975.jpg"
   );
 
   // Extend basic schema based on role

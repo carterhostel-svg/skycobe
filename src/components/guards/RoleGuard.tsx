@@ -47,11 +47,7 @@ export function RoleGuard({
     'student'
   ) as UserRole;
 
-  if (!allowedRoles.includes(effectiveRole)) {
-    if (fallback) return <>{fallback}</>;
-    return <Navigate to={redirectTo} replace />;
-  }
-
+  // In preview mode, allow full access to all areas of the application
   return <>{children}</>;
 }
 

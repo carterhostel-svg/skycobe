@@ -24,6 +24,25 @@ export interface Property {
   pricing_tag?: string;
 }
 
+export interface HostelBooking {
+  id: string;
+  propertyId: number | string;
+  propertyName: string;
+  propertyLoc: string;
+  propertyImg: string;
+  roomType: string;
+  semester: string;
+  totalPrice: number;
+  depositPaid: number;
+  studentName: string;
+  studentId: string;
+  studentPhone: string;
+  bookedAt: string;
+  status: 'Confirmed' | 'Pending Review' | 'Checked In';
+  bookingRef: string;
+  checkInDate: string;
+}
+
 export interface AppState {
   savedProperties: (number | string)[]; // Array of saved property IDs
   activeFilter: string; // Defaults to 'all'
@@ -33,3 +52,4 @@ export interface ViewState {
   currentView: 'home' | 'explore' | 'details' | 'saved' | 'profile' | 'signup' | 'virtual-tour' | 'price-alerts' | 'manager-dashboard';
   selectedPropertyId: number | string | null;
 }
+

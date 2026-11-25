@@ -1,130 +1,248 @@
 import { Property } from './types';
 
-export const PROPERTIES: Property[] = [
+export interface ExtendedProperty extends Property {
+  gpsCode?: string;
+  walkingMin?: number;
+  roomTiers?: {
+    type: '1-in-a-room' | '2-in-a-room' | '3-in-a-room' | '4-in-a-room';
+    label: string;
+    pricePerSem: number;
+    availableCount: number;
+    hasAc: boolean;
+    hasBath: 'Private' | 'Shared';
+  }[];
+}
+
+export const PROPERTIES: ExtendedProperty[] = [
   {
     id: 1,
-    name: 'The Haven Residences',
-    loc: 'North Legon · 5 min to campus',
-    lat: 5.6420,
-    lng: -0.1982,
+    name: 'The Haven Executive Residences',
+    loc: 'Legon',
+    lat: 5.6508,
+    lng: -0.1869,
     price: 'GH₵6,500',
     priceNum: 6500,
-    rating: 4.8,
-    reviews: 124,
-    tags: ['wifi', 'ac', 'sec'],
+    rating: 4.9,
+    reviews: 148,
+    tags: ['wifi', 'ac', 'sec', 'gen'],
     category: 'premium',
-    avail: '2 units',
-    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop',
+    avail: '2 suites left',
+    gpsCode: 'GA-492-3810',
+    walkingMin: 4,
+    img: '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
     images: [
-      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1502672260266-1c1c24240f38?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+      '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg',
+      '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg'
     ],
-    panoramas: ['https://pannellum.org/images/bma-0.jpg']
+    panoramas: ['https://pannellum.org/images/bma-0.jpg'],
+    desc: 'Flagship student residence featuring uninterrupted standby generator, 24/7 water, fiber Wi-Fi, and soundproof study rooms. Opposite Legon campus.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 8900, availableCount: 2, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 5800, availableCount: 4, hasAc: true, hasBath: 'Private' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 3600, availableCount: 6, hasAc: false, hasBath: 'Shared' }
+    ]
   },
   {
     id: 2,
-    name: 'Nova Student Living',
-    loc: 'Legon Campus · 2 min to main gate',
+    name: 'Terra Hall Academic Living',
+    loc: 'Legon',
     lat: 5.6471,
     lng: -0.1901,
-    price: 'GH₵4,200',
-    priceNum: 4200,
-    rating: 4.2,
-    reviews: 89,
-    tags: ['sec', 'gen'],
-    category: 'standard',
-    avail: 'Sold out',
-    img: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=800&auto=format&fit=crop',
+    price: 'GH₵5,200',
+    priceNum: 5200,
+    rating: 4.8,
+    reviews: 96,
+    tags: ['wifi', 'sec', 'gen'],
+    category: 'premium',
+    avail: 'Available',
+    gpsCode: 'GA-110-4492',
+    walkingMin: 2,
+    img: '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
     images: [
-      'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+      '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg',
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg'
     ],
-    panoramas: ['https://pannellum.org/images/library.jpg']
+    panoramas: ['https://pannellum.org/images/library.jpg'],
+    desc: 'Quiet academic residence situated inside Legon. Immediate walking distance to lecture halls and central library.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 7800, availableCount: 1, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 5200, availableCount: 5, hasAc: true, hasBath: 'Shared' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 3400, availableCount: 8, hasAc: false, hasBath: 'Shared' }
+    ]
   },
   {
     id: 3,
-    name: 'Skycobe Signature Suites',
-    loc: 'Legon · 10 min to central',
+    name: 'Pentagon & Bani Student Complex',
+    loc: 'Legon',
     lat: 5.6510,
     lng: -0.1855,
-    price: 'GH₵5,000',
-    priceNum: 5000,
-    rating: 4.5,
-    reviews: 210,
+    price: 'GH₵4,800',
+    priceNum: 4800,
+    rating: 4.7,
+    reviews: 230,
     tags: ['wifi', 'sec', 'gen', 'ac'],
-    category: 'premium',
-    avail: 'Available',
-    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop',
+    category: 'standard',
+    avail: '4 rooms left',
+    gpsCode: 'GA-382-7104',
+    walkingMin: 6,
+    img: '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg',
     images: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg',
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+      '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg'
     ],
-    panoramas: ['https://pannellum.org/images/jfk.jpg']
+    panoramas: ['https://pannellum.org/images/jfk.jpg'],
+    desc: 'Vibrant student community in Legon Diaspora. Fitted with rooftop terrace study pods, laundry services, mart, and shuttle connection.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room (Studio)', pricePerSem: 7500, availableCount: 3, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room (Standard)', pricePerSem: 4800, availableCount: 4, hasAc: true, hasBath: 'Private' },
+      { type: '4-in-a-room', label: '4 in a Room (Value)', pricePerSem: 3100, availableCount: 10, hasAc: false, hasBath: 'Shared' }
+    ]
   },
   {
     id: 4,
-    name: 'The Quad at Atomic',
-    loc: 'Atomic Junction · 8 min to campus',
+    name: 'The Study Hub & Studio Suites',
+    loc: 'Legon',
     lat: 5.6582,
     lng: -0.1868,
-    price: 'GH₵3,800',
-    priceNum: 3800,
-    rating: 3.9,
-    reviews: 45,
-    tags: ['wifi'],
+    price: 'GH₵3,900',
+    priceNum: 3900,
+    rating: 4.6,
+    reviews: 82,
+    tags: ['wifi', 'gen'],
     category: 'budget',
-    avail: '5 units',
-    img: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800&auto=format&fit=crop',
+    avail: '5 rooms left',
+    gpsCode: 'GE-201-9943',
+    walkingMin: 8,
+    img: '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg',
     images: [
-      'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg',
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg'
     ],
-    panoramas: ['https://pannellum.org/images/bma-1.jpg']
+    panoramas: ['https://pannellum.org/images/bma-1.jpg'],
+    desc: 'Modern student hostel featuring quiet reading rooms, reliable water reservoirs, and campus shuttle access.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 6200, availableCount: 2, hasAc: false, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 3900, availableCount: 5, hasAc: false, hasBath: 'Shared' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 2600, availableCount: 12, hasAc: false, hasBath: 'Shared' }
+    ]
   },
   {
     id: 5,
-    name: 'Oasis Heights',
-    loc: 'South Legon · 3 min to main gate',
+    name: 'Evandy & TF Enclave Living',
+    loc: 'Legon',
     lat: 5.6350,
     lng: -0.1850,
-    price: 'GH₵4,500',
-    priceNum: 4500,
-    rating: 4.1,
-    reviews: 62,
-    tags: ['sec', 'gen'],
+    price: 'GH₵4,600',
+    priceNum: 4600,
+    rating: 4.5,
+    reviews: 114,
+    tags: ['sec', 'gen', 'wifi'],
     category: 'standard',
-    avail: '1 unit',
-    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop',
+    avail: 'Available',
+    gpsCode: 'GA-510-1892',
+    walkingMin: 5,
+    img: '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
     images: [
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1493809842364-78817add7ff6?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+      '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg',
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg'
     ],
-    panoramas: ['https://pannellum.org/images/milan.jpg']
+    panoramas: ['https://pannellum.org/images/milan.jpg'],
+    desc: 'Trusted student residence near South Gate. Known for tight security, cleanliness, and active student community.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 7200, availableCount: 1, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 4600, availableCount: 6, hasAc: true, hasBath: 'Private' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 3200, availableCount: 9, hasAc: false, hasBath: 'Shared' }
+    ]
   },
   {
     id: 6,
-    name: 'Prism Hostels',
-    loc: 'Outer Legon · 15 min to campus',
-    lat: 5.6200,
-    lng: -0.1750,
-    price: 'GH₵3,200',
-    priceNum: 3200,
-    rating: 4.9,
-    reviews: 312,
-    tags: ['wifi', 'sec'],
-    category: 'budget',
-    avail: '10 units',
-    img: 'https://images.unsplash.com/photo-1528909514045-2ba42816b4bb?q=80&w=800&auto=format&fit=crop',
+    name: 'Kumasi Tech Apex Residences',
+    loc: 'Ayeduase',
+    lat: 6.6731,
+    lng: -1.5654,
+    price: 'GH₵4,200',
+    priceNum: 4200,
+    rating: 4.8,
+    reviews: 175,
+    tags: ['wifi', 'sec', 'ac', 'gen'],
+    category: 'standard',
+    avail: '3 rooms left',
+    gpsCode: 'AK-391-4402',
+    walkingMin: 4,
+    img: '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
     images: [
-      'https://images.unsplash.com/photo-1528909514045-2ba42816b4bb?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1598928506311-c55dd1b31048?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=800&auto=format&fit=crop'
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg',
+      '/src/assets/images/hostel_study_lounge_hub_1793064307395.jpg',
+      '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg'
     ],
-    panoramas: []
+    panoramas: [],
+    desc: 'Top choice for KNUST engineering and science students in Ayeduase with backup power and security.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 6800, availableCount: 3, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 4200, availableCount: 5, hasAc: true, hasBath: 'Private' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 2900, availableCount: 8, hasAc: false, hasBath: 'Shared' }
+    ]
+  },
+  {
+    id: 7,
+    name: 'Cape Coast Seaside Scholar Hostel',
+    loc: 'Cape Coast',
+    lat: 5.1155,
+    lng: -1.2882,
+    price: 'GH₵3,700',
+    priceNum: 3700,
+    rating: 4.7,
+    reviews: 64,
+    tags: ['wifi', 'sec', 'gen'],
+    category: 'budget',
+    avail: 'Available',
+    gpsCode: 'CC-094-1183',
+    walkingMin: 5,
+    img: '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg',
+    images: [
+      '/src/assets/images/hostel_terrace_exterior_1793064306957.jpg',
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg'
+    ],
+    panoramas: [],
+    desc: 'Scenic seaside campus accommodation for UCC students. Short walk to science lecture blocks.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 5800, availableCount: 2, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 3700, availableCount: 7, hasAc: false, hasBath: 'Shared' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 2400, availableCount: 10, hasAc: false, hasBath: 'Shared' }
+    ]
+  },
+  {
+    id: 8,
+    name: 'UPSA Metro Student Tower',
+    loc: 'Madina',
+    lat: 5.6540,
+    lng: -0.1650,
+    price: 'GH₵4,900',
+    priceNum: 4900,
+    rating: 4.7,
+    reviews: 89,
+    tags: ['wifi', 'ac', 'sec', 'gen'],
+    category: 'standard',
+    avail: '4 rooms left',
+    gpsCode: 'GA-712-9011',
+    walkingMin: 3,
+    img: '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+    images: [
+      '/src/assets/images/hostel_room_premium_suite_1793064306621.jpg',
+      '/src/assets/images/hero_student_residence_haven_1793064306511.jpg'
+    ],
+    panoramas: [],
+    desc: 'High-rise residence opposite UPSA campus with backup electricity and security access.',
+    roomTiers: [
+      { type: '1-in-a-room', label: '1 in a Room', pricePerSem: 7600, availableCount: 2, hasAc: true, hasBath: 'Private' },
+      { type: '2-in-a-room', label: '2 in a Room', pricePerSem: 4900, availableCount: 4, hasAc: true, hasBath: 'Private' },
+      { type: '4-in-a-room', label: '4 in a Room', pricePerSem: 3300, availableCount: 8, hasAc: false, hasBath: 'Shared' }
+    ]
   }
 ];

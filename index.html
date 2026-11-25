@@ -9,22 +9,40 @@
     <title>SKYCOBE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Urbanist:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
       (function () {
-        var stored = localStorage.getItem('skycobe_theme_mode') || 'system';
-        var resolved =
-          stored === 'dark'
-            ? 'dark'
-            : stored === 'light'
-            ? 'light'
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
+        var stored = localStorage.getItem('skycobe_theme_v2') || 'light';
+        var resolved = stored === 'dark'
+          ? 'dark'
+          : stored === 'system'
+            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
             : 'light';
         document.documentElement.setAttribute('data-theme', resolved);
         if (resolved === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
       })();
+
+      // Suppress Vite HMR WebSocket connection errors in dev iframe
+      window.addEventListener('unhandledrejection', function (e) {
+        var reason = e && (e.reason || e);
+        var msg = (reason && (reason.message || reason.stack || String(reason))) || '';
+        if (
+          msg.includes('WebSocket') ||
+          msg.includes('@vite/client') ||
+          msg.includes('vite-hmr') ||
+          msg.includes('createWebSocketModuleRunnerTransport')
+        ) {
+          e.preventDefault();
+        }
+      });
+      window.addEventListener('error', function (e) {
+        var filename = e && e.filename;
+        if (filename && filename.includes('@vite/client')) {
+          e.preventDefault();
+        }
+      });
     </script>
   </head>
   <body>

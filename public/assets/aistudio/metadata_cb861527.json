@@ -1,0 +1,15 @@
+{
+  "uuid": "liquid-vapor-glass@local",
+  "name": "Liquid Vapor Glass",
+  "description": "Liquid glass with edge refraction, wave + vapor displacement and a looping water animation for the top panel and the dash. No blur, very low noise. Based on Blur my Shell.",
+  "shell-version": [
+    "46",
+    "47",
+    "48",
+    "49",
+    "50",
+    "51"
+  ],
+  "version": 1,
+  "license": "GPL-3.0-or-later"
+}

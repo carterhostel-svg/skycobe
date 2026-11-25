@@ -1,80 +1,140 @@
 import React from 'react';
-import { Bell, Maximize, Minimize, ArrowRightLeft, Search, Menu } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Compass, Heart, Sun, Moon, CalendarCheck, ShieldCheck } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const Header: React.FC = () => {
-  const { showToast, isFullscreen, toggleFullscreen, toggleSidebar } = useAppContext();
-  const [notifications, setNotifications] = React.useState(3);
+  const { savedProperties, bookings } = useAppContext();
+  const { resolved, toggle } = useTheme();
+  const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] w-full bg-card-bg/90 backdrop-blur-md border-b border-border-subtle transition-colors duration-300">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-[100] w-full bg-[var(--color-header-bg)] backdrop-blur-md border-b border-[var(--color-border)] transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
         
-        {/* LEFT: Toggle + Logo */}
-        <div className="flex-shrink-0 flex items-center gap-4">
-          <button 
-            onClick={toggleSidebar}
-            className="hidden md:flex p-2 text-text-primary hover:bg-[var(--color-surface-hover)] rounded-md transition-colors"
+        {/* Zone 1: Brand Wordmark */}
+        <div className="flex items-center gap-3 shrink-0">
+          <NavLink 
+            to="/" 
+            className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <Menu size={24} />
-          </button>
-          <div className="cursor-pointer hover:opacity-80 transition-opacity flex items-center">
-            <span className="text-text-primary text-[22px] font-extrabold tracking-widest uppercase">
-              SKY<span style={{ color: "#e8b96a" }}>COBE</span>
-            </span>
-          </div>
-        </div>
-
-        {/* MIDDLE: Search Pill (Desktop Only - Airbnb Style) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-6">
-          <div 
-            onClick={() => showToast('Search opened')}
-            className="w-full flex items-center bg-app-bg border border-border-subtle rounded-full pl-5 pr-2 py-2 shadow-sm hover:shadow-md hover:border-[var(--color-border-strong)] transition-all cursor-pointer group"
-          >
-            <span className="text-sm font-semibold text-text-primary flex-1 truncate">Anywhere</span>
-            <div className="w-[1px] h-5 bg-border-subtle mx-3" />
-            <span className="text-sm font-semibold text-text-primary flex-1 truncate">Any duration</span>
-            <div className="w-[1px] h-5 bg-border-subtle mx-3" />
-            <span className="text-sm text-text-muted flex-1 truncate">Add filters</span>
-            <div className="w-8 h-8 rounded-full bg-[var(--color-button)] flex items-center justify-center ml-2 text-white group-hover:scale-105 transition-transform shadow-sm">
-              <Search size={14} strokeWidth={3} />
+            <div className="w-9 h-9 rounded-xl bg-[#ccff00] flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
+              <span className="font-black text-base tracking-tighter text-black">H</span>
             </div>
-          </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-extrabold tracking-tight text-[var(--color-text-primary)] leading-none">
+                  HAVEN
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 font-bold uppercase rounded bg-[var(--color-accent-muted)] text-[var(--color-accent)]">
+                  Hostels
+                </span>
+              </div>
+              <span className="text-[10px] font-medium tracking-wider text-[var(--color-text-secondary)] uppercase mt-0.5">
+                Campus Living
+              </span>
+            </div>
+          </NavLink>
         </div>
 
-        {/* RIGHT: Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          <button 
-            onClick={() => showToast('Compare mode activated')}
-            className="hidden sm:flex items-center h-10 px-4 rounded-full text-text-primary font-semibold text-sm hover:bg-[var(--color-surface-hover)] transition-colors"
+        {/* Zone 2: Navigation Links (Strictly Hostel Booking & Finding) */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-semibold text-[var(--color-text-secondary)]">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `whitespace-nowrap transition-colors hover:text-[var(--color-text-primary)] ${
+                isActive ? 'text-[var(--color-accent)] font-bold' : ''
+              }`
+            }
           >
-            <ArrowRightLeft size={16} className="mr-2 text-text-muted" /> Compare
+            Find Hostels
+          </NavLink>
+
+          <NavLink
+            to="/explore"
+            className={({ isActive }) =>
+              `whitespace-nowrap transition-colors hover:text-[var(--color-text-primary)] ${
+                isActive ? 'text-[var(--color-accent)] font-bold' : ''
+              }`
+            }
+          >
+            Campus Map
+          </NavLink>
+
+          <NavLink
+            to="/saved"
+            className={({ isActive }) =>
+              `relative whitespace-nowrap transition-colors hover:text-[var(--color-text-primary)] ${
+                isActive ? 'text-[var(--color-accent)] font-bold' : ''
+              }`
+            }
+          >
+            Saved Hostels
+            {savedProperties.length > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[var(--color-accent-muted)] text-[var(--color-accent)]">
+                {savedProperties.length}
+              </span>
+            )}
+          </NavLink>
+
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `relative whitespace-nowrap transition-colors hover:text-[var(--color-text-primary)] ${
+                isActive ? 'text-[var(--color-accent)] font-bold' : ''
+              }`
+            }
+          >
+            My Bookings
+            {bookings.length > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                {bookings.length}
+              </span>
+            )}
+          </NavLink>
+        </nav>
+
+        {/* Zone 3: Actions & Theme Toggle */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          
+          {/* Quick theme mode toggle */}
+          <button
+            type="button"
+            onClick={toggle}
+            className="p-2 rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
+            title="Toggle color mode"
+            aria-label="Toggle color mode"
+          >
+            {resolved === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <button 
-            onClick={toggleFullscreen}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-text-primary hover:bg-[var(--color-surface-hover)] transition-colors"
-            aria-label="Toggle fullscreen"
+          {/* Direct Reserve Room Action */}
+          <button
+            type="button"
+            onClick={() => navigate('/explore')}
+            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer shadow-xs"
           >
-            {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+            <Compass size={14} className="text-[var(--color-accent)]" />
+            <span>Map Search</span>
           </button>
-          
-          <button 
-            onClick={() => {
-              if (notifications > 0) {
-                showToast(`You have ${notifications} new notifications`);
-                setNotifications(0);
-              } else {
-                showToast('No new notifications');
-              }
-            }}
-            className="relative w-10 h-10 rounded-full flex items-center justify-center text-text-primary hover:bg-[var(--color-surface-hover)] transition-colors"
+
+          {/* Student Profile Quick Access */}
+          <NavLink
+            to="/profile"
+            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)] transition-colors cursor-pointer"
+            title="Student Profile & Bookings"
           >
-            <Bell size={20} strokeWidth={2.2} />
-            {notifications > 0 && (
-              <span className="absolute top-2 right-2.5 w-2.5 h-2.5 bg-[var(--color-error)] rounded-full border-2 border-card-bg"></span>
-            )}
-          </button>
+            <img
+              src="/src/assets/images/student_alex_avatar_1793064702975.jpg"
+              alt="Alex Owusu"
+              className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+            />
+            <span className="hidden lg:inline text-xs font-bold text-[var(--color-text-primary)] pr-1">
+              Alex
+            </span>
+          </NavLink>
         </div>
 
       </div>

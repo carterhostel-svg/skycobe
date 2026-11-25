@@ -402,8 +402,8 @@ export const ManagerDashboard: React.FC = () => {
           <NavItem icon={<Settings size={18} />} label="Settings" active={activeTab === "settings"} onClick={() => { setActiveTab("settings"); setSidebarOpen(false); }} />
         </div>
         <div className="p-4 mt-auto border-t border-[var(--color-border)]">
-           <button onClick={() => navigate('/student/dashboard')} className="flex items-center gap-3 w-full p-3 rounded-[12px] bg-[var(--color-button)]/10 text-[var(--color-accent)] font-semibold border-none hover:bg-[var(--color-button)]/20 transition-colors">
-              <span className="flex-1 text-center">Switch to Student View</span>
+           <button onClick={() => navigate('/')} className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-heading)] text-xs font-semibold hover:border-slate-400 transition-colors cursor-pointer">
+              <span>Back to Student Discovery</span>
            </button>
         </div>
       </div>

@@ -25,7 +25,7 @@ export const PriceAlerts: React.FC = () => {
       <PageHeader 
         title="Price Alerts"
         showBackButton={true}
-        onBack={() => navigate("/student/dashboard")}
+        onBack={() => navigate(-1)}
       />
 
       <div className="w-full pb-20">
